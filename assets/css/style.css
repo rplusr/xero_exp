@@ -44,6 +44,7 @@
   --max-width: 1600px;
   --nav-height: 60px;
   --nav-margin: var(--space-3);
+  --nav-radius: 20px;
 
   /* motion */
   --ease: cubic-bezier(.2, 0, 0, 1);
@@ -88,7 +89,7 @@ a { color: inherit; }
   max-width: calc(var(--max-width) - var(--nav-margin) * 2);
   margin: 0 auto;
   height: var(--nav-height);
-  border-radius: 999px;
+  border-radius: var(--nav-radius);
   background: var(--header-bg);
   box-shadow: var(--header-shadow);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -182,9 +183,77 @@ a { color: inherit; }
   transform: scaleX(1);
 }
 
+.nav-chevron {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: var(--space-1);
+  margin-bottom: 1px;
+  border-right: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+  transform: rotate(45deg);
+  transition: transform var(--t-default) var(--ease);
+}
+
+.nav-item:hover .nav-chevron,
+.nav-item.is-open .nav-chevron {
+  transform: rotate(225deg);
+}
+
 @keyframes nav-in {
   from { opacity: 0; transform: translateY(calc(-1 * var(--space-2))); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------------- */
+/* Mega panel — dropdown reveal, matches header padding/radius        */
+/* ---------------------------------------------------------------- */
+
+.mega-panel {
+  position: fixed;
+  top: calc(var(--nav-margin) * 2 + var(--nav-height));
+  left: var(--nav-margin);
+  right: var(--nav-margin);
+  bottom: var(--nav-margin);
+  z-index: 95;
+  border-radius: var(--nav-radius);
+  border: 1px solid var(--line);
+  background: var(--header-bg-scrolled);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  padding: var(--space-6) var(--space-4);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-12px);
+  pointer-events: none;
+  transition: opacity var(--t-default) var(--ease), transform var(--t-default) var(--ease), visibility 0s linear var(--t-default);
+}
+
+.mega-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition: opacity var(--t-default) var(--ease), transform var(--t-default) var(--ease);
+}
+
+.mega-row {
+  display: block;
+  font-size: var(--fs-title);
+  font-weight: var(--weight-text);
+  color: var(--ink);
+  text-decoration: none;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--line);
+  transition: color var(--t-default) var(--ease), padding-left var(--t-default) var(--ease);
+}
+
+.mega-row:first-of-type { border-top: 1px solid var(--line); }
+
+.mega-row:hover,
+.mega-row:focus-visible {
+  color: var(--accent);
+  padding-left: var(--space-3);
 }
 
 /* mobile menu toggle */
@@ -285,6 +354,7 @@ a { color: inherit; }
 @media (max-width: 860px) {
   .nav { display: none; }
   .menu-toggle { display: inline-flex; }
+  .mega-panel { display: none; }
 }
 
 /* ---------------------------------------------------------------- */
@@ -297,9 +367,9 @@ a { color: inherit; }
     animation: none;
     opacity: 1;
   }
-  .logo, .nav-link, .nav-link::after, .menu-toggle-icon::before, .menu-toggle-icon::after,
-  .mobile-overlay, .site-header {
+  .logo, .nav-link, .nav-link::after, .nav-chevron, .menu-toggle-icon::before, .menu-toggle-icon::after,
+  .mobile-overlay, .mega-panel, .mega-row, .site-header {
     transition-property: opacity, color, background-color;
   }
-  .mobile-overlay { transform: none; }
+  .mobile-overlay, .mega-panel { transform: none; }
 }
