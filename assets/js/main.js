@@ -74,15 +74,18 @@
   });
 
   // scramble reveal, adapted from kinetics (github.com/ckissi/kinetics)
-  // restricted to digits per the brand's tabular-numeral convention
+  // restricted to digits per the brand's tabular-numeral convention;
+  // tuned short — a quick flicker, not a laboured decode
   var SCRAMBLE_CHARS = "0123456789";
-  var SCRAMBLE_FRAME_MS = 35;
-  var SCRAMBLE_TOTAL = 24;
+  var SCRAMBLE_FRAME_MS = 22;
+  var SCRAMBLE_TOTAL = 6;
+  var SCRAMBLE_STAGGER = 0.35;
 
   function scramble(el) {
     var text = el.getAttribute("data-scramble") || el.textContent;
     if (el._scrambleTimer) clearInterval(el._scrambleTimer);
     var frame = 0;
+    var stopFrame = SCRAMBLE_TOTAL + (text.length - 1) * SCRAMBLE_STAGGER + 3;
     el._scrambleTimer = setInterval(function () {
       frame++;
       var out = "";
@@ -92,13 +95,13 @@
           out += " ";
           continue;
         }
-        var progress = frame - i * 1.2;
+        var progress = frame - i * SCRAMBLE_STAGGER;
         out += progress > SCRAMBLE_TOTAL * 0.6
           ? c
           : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
       }
       el.textContent = out;
-      if (frame > SCRAMBLE_TOTAL + text.length) {
+      if (frame > stopFrame) {
         clearInterval(el._scrambleTimer);
         el._scrambleTimer = null;
         el.textContent = text;

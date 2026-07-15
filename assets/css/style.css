@@ -143,12 +143,9 @@ a { color: inherit; }
 }
 
 .logo {
-  font-size: 17px;
-  font-weight: var(--weight-bold);
-  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
-  letter-spacing: -0.01em;
-  display: inline-block;
   transition: transform var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
   opacity: 0;
   animation: nav-in var(--t-reveal) var(--ease) forwards;
@@ -158,6 +155,12 @@ a { color: inherit; }
 .logo:focus-visible {
   transform: scale(1.04);
   opacity: 1 !important;
+}
+
+.logo-mark {
+  display: block;
+  height: 24px;
+  width: auto;
 }
 
 .brand-subtitle {
