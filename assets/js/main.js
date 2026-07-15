@@ -75,11 +75,11 @@
 
   // scramble reveal, adapted from kinetics (github.com/ckissi/kinetics)
   // restricted to digits per the brand's tabular-numeral convention;
-  // tuned short — a quick flicker, not a laboured decode
+  // slow enough per-digit to actually read, short enough not to labour
   var SCRAMBLE_CHARS = "0123456789";
-  var SCRAMBLE_FRAME_MS = 22;
-  var SCRAMBLE_TOTAL = 6;
-  var SCRAMBLE_STAGGER = 0.35;
+  var SCRAMBLE_FRAME_MS = 40;
+  var SCRAMBLE_TOTAL = 8;
+  var SCRAMBLE_STAGGER = 0.5;
 
   function scramble(el) {
     var text = el.getAttribute("data-scramble") || el.textContent;
