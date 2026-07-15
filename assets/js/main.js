@@ -36,6 +36,7 @@
     item.classList.add("is-open");
     item.querySelector(".nav-link").setAttribute("aria-expanded", "true");
     megaPanel.classList.add("is-open");
+    header.classList.add("mega-open");
   }
 
   function scheduleCloseMega() {
@@ -46,6 +47,7 @@
         i.querySelector(".nav-link").setAttribute("aria-expanded", "false");
       });
       megaPanel.classList.remove("is-open");
+      header.classList.remove("mega-open");
     }, 150);
   }
 
@@ -67,6 +69,7 @@
         i.querySelector(".nav-link").setAttribute("aria-expanded", "false");
       });
       megaPanel.classList.remove("is-open");
+      header.classList.remove("mega-open");
     }
   });
 })();
