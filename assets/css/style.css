@@ -54,9 +54,8 @@
   --t-default: 240ms;
   --t-reveal: 400ms;
 
-  /* header frost */
-  --header-bg: rgba(250, 250, 250, 0.55);
-  --header-bg-scrolled: rgba(250, 250, 250, 0.8);
+  /* header */
+  --header-bg: #FFFFFF;
   --header-shadow: 0 0 24px rgba(0, 8, 86, 0.16);
 }
 
@@ -98,19 +97,15 @@ a { color: inherit; }
   border-radius: var(--nav-radius);
   background: var(--header-bg);
   box-shadow: var(--header-shadow);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  transition: background-color var(--t-default) var(--ease), box-shadow var(--t-default) var(--ease), border-radius var(--t-default) var(--ease);
-}
-
-.site-header.is-scrolled,
-.site-header.mega-open {
-  background: var(--header-bg-scrolled);
+  transition: box-shadow var(--t-default) var(--ease), border-radius var(--t-default) var(--ease);
 }
 
 .site-header.mega-open {
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+  /* the panel below carries its own shadow around the combined shape;
+     keeping this one too would double up right at the seam */
+  box-shadow: none;
 }
 
 .header-inner {
@@ -228,10 +223,8 @@ a { color: inherit; }
   border-radius: var(--nav-radius);
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-  background: var(--header-bg-scrolled);
+  background: var(--header-bg);
   box-shadow: var(--header-shadow);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
   padding: var(--space-5) var(--space-4);
   opacity: 0;
   visibility: hidden;
