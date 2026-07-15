@@ -225,9 +225,8 @@ a { color: inherit; }
   border-radius: var(--nav-radius);
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-  border: 1px solid var(--line);
-  border-top: none;
   background: var(--header-bg-scrolled);
+  box-shadow: var(--header-shadow);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
   padding: var(--space-6) var(--space-4);
