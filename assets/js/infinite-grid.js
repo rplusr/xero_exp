@@ -1,6 +1,7 @@
 (function () {
   var host = document.getElementById("grid-host");
-  if (!host) return;
+  var warp = document.getElementById("grid-warp");
+  if (!host || !warp) return;
 
   var LERP = 0.18;
   var INERTIA_DECAY = 0.94;
@@ -8,6 +9,11 @@
   var IDLE_DELAY = 1500;
   var DRIFT_X = -0.12;
   var DRIFT_Y = 0;
+  // facet size matches the montage's own repeat cell (see torus-grid.png /
+  // build_charms_montage.py "cell") so seams land in the gaps between icons
+  // rather than cutting through one, at any pan offset
+  var MONTAGE_CELL = 160;
+  var MAX_ANGLE = 32;
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -23,9 +29,55 @@
   var animating = false;
   var autoDrift = false;
   var idleTimer = null;
+  var tiles = [];
+  var resizeTimer = null;
+
+  function buildTiles() {
+    var w = host.clientWidth;
+    var h = host.clientHeight;
+    var cols = Math.ceil(w / MONTAGE_CELL);
+    var rows = Math.ceil(h / MONTAGE_CELL);
+    var totalCols = cols + 1;
+    var totalRows = rows + 1;
+
+    warp.innerHTML = "";
+    tiles = [];
+
+    // one extra column/row of buffer (slot -1) covers the gap the
+    // fractional pan shift reveals at the top/left edge
+    for (var r = -1; r < rows; r++) {
+      for (var c = -1; c < cols; c++) {
+        var tile = document.createElement("div");
+        tile.className = "grid-tile";
+        var slotLeft = c * MONTAGE_CELL;
+        var slotTop = r * MONTAGE_CELL;
+        tile.style.width = MONTAGE_CELL + "px";
+        tile.style.height = MONTAGE_CELL + "px";
+
+        var nx = (c + 1 + 0.5) / totalCols - 0.5;
+        var ny = (r + 1 + 0.5) / totalRows - 0.5;
+        var rotY = nx * MAX_ANGLE;
+        var rotX = -ny * MAX_ANGLE;
+        tile.style.transform = "rotateX(" + rotX + "deg) rotateY(" + rotY + "deg)";
+
+        warp.appendChild(tile);
+        tiles.push({ el: tile, slotLeft: slotLeft, slotTop: slotTop });
+      }
+    }
+  }
 
   function render() {
-    host.style.backgroundPosition = curX + "px " + curY + "px";
+    var fracX = ((curX % MONTAGE_CELL) + MONTAGE_CELL) % MONTAGE_CELL;
+    var fracY = ((curY % MONTAGE_CELL) + MONTAGE_CELL) % MONTAGE_CELL;
+    var wholeX = curX - fracX;
+    var wholeY = curY - fracY;
+
+    for (var i = 0; i < tiles.length; i++) {
+      var t = tiles[i];
+      t.el.style.left = (t.slotLeft + fracX) + "px";
+      t.el.style.top = (t.slotTop + fracY) + "px";
+      t.el.style.backgroundPosition = (wholeX - t.slotLeft) + "px " + (wholeY - t.slotTop) + "px";
+    }
   }
 
   function tick() {
@@ -111,10 +163,21 @@
     scheduleIdleDrift();
   }
 
+  function onResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      buildTiles();
+      render();
+    }, 150);
+  }
+
   host.addEventListener("pointerdown", onDown);
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
   window.addEventListener("pointercancel", onUp);
+  window.addEventListener("resize", onResize);
 
+  buildTiles();
+  render();
   scheduleIdleDrift();
 })();
