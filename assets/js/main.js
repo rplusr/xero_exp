@@ -117,7 +117,7 @@
     }, SCRAMBLE_FRAME_MS);
   }
 
-  document.querySelectorAll(".mega-row").forEach(function (row) {
+  document.querySelectorAll(".mega-row, .mobile-link").forEach(function (row) {
     row.addEventListener("mouseenter", function () { scramble(row); });
     row.addEventListener("focus", function () { scramble(row); });
   });

@@ -17,45 +17,56 @@
       <span class="brand-subtitle">Brand Guidelines</span>
     </div>
 
-    <nav class="nav" aria-label="Primary">
-      <ul>
-        <li class="nav-item" data-panel="principles">
-          <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
-            <span>Principles</span>
-            <span class="nav-chevron" aria-hidden="true">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </a>
-        </li>
-        <li class="nav-item" data-panel="expression">
-          <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
-            <span>Expression</span>
-            <span class="nav-chevron" aria-hidden="true">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </a>
-        </li>
-        <li class="nav-item" data-panel="resources">
-          <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
-            <span>Resources</span>
-            <span class="nav-chevron" aria-hidden="true">
-              <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
-                <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </a>
-        </li>
-      </ul>
-    </nav>
+    <div class="header-actions">
+      <nav class="nav" aria-label="Primary">
+        <ul>
+          <li class="nav-item" data-panel="principles">
+            <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
+              <span>Principles</span>
+              <span class="nav-chevron" aria-hidden="true">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item" data-panel="expression">
+            <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
+              <span>Expression</span>
+              <span class="nav-chevron" aria-hidden="true">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item" data-panel="resources">
+            <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
+              <span>Resources</span>
+              <span class="nav-chevron" aria-hidden="true">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </nav>
 
-    <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-overlay">
-      <span class="menu-toggle-label">menu</span>
-      <span class="menu-toggle-icon" aria-hidden="true"></span>
-    </button>
+      <a href="#" class="login-btn">
+        <svg class="login-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        <span>Log in</span>
+      </a>
+
+      <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-overlay">
+        <span class="menu-toggle-label">menu</span>
+        <span class="menu-toggle-icon" aria-hidden="true"></span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -86,9 +97,9 @@
 <div class="mobile-overlay" id="mobile-overlay">
   <nav aria-label="Primary mobile">
     <ul>
-      <li><a href="#" class="mobile-link">Principles</a></li>
-      <li><a href="#" class="mobile-link">Expression</a></li>
-      <li><a href="#" class="mobile-link">Resources</a></li>
+      <li><a href="#" class="mobile-link" data-scramble="Principles">Principles</a></li>
+      <li><a href="#" class="mobile-link" data-scramble="Expression">Expression</a></li>
+      <li><a href="#" class="mobile-link" data-scramble="Resources">Resources</a></li>
     </ul>
   </nav>
 </div>
