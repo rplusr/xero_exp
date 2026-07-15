@@ -19,7 +19,7 @@
 
     <nav class="nav" aria-label="Primary">
       <ul>
-        <li class="nav-item">
+        <li class="nav-item" data-panel="principles">
           <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
             <span>Principles</span>
             <span class="nav-chevron" aria-hidden="true">
@@ -29,7 +29,7 @@
             </span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" data-panel="expression">
           <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
             <span>Expression</span>
             <span class="nav-chevron" aria-hidden="true">
@@ -39,7 +39,7 @@
             </span>
           </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" data-panel="resources">
           <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
             <span>Resources</span>
             <span class="nav-chevron" aria-hidden="true">
@@ -60,9 +60,27 @@
 </header>
 
 <div class="mega-panel" id="mega-panel">
-  <a href="#" class="mega-row" data-scramble="Brand Archetype">Brand Archetype</a>
-  <a href="#" class="mega-row" data-scramble="Brand Attributes">Brand Attributes</a>
-  <a href="#" class="mega-row" data-scramble="Brand Values">Brand Values</a>
+  <div class="mega-content" data-panel="principles">
+    <a href="#" class="mega-row" data-scramble="Brand Archetype">Brand Archetype</a>
+    <a href="#" class="mega-row" data-scramble="Brand Attributes">Brand Attributes</a>
+    <a href="#" class="mega-row" data-scramble="Brand Values">Brand Values</a>
+  </div>
+  <div class="mega-content" data-panel="expression">
+    <a href="#" class="mega-row" data-scramble="Logo">Logo</a>
+    <a href="#" class="mega-row" data-scramble="Colour">Colour</a>
+    <a href="#" class="mega-row" data-scramble="Wordmark & Lockups">Wordmark & Lockups</a>
+    <a href="#" class="mega-row" data-scramble="Typography">Typography</a>
+    <a href="#" class="mega-row" data-scramble="Illustration">Illustration</a>
+    <a href="#" class="mega-row" data-scramble="Photography">Photography</a>
+    <a href="#" class="mega-row" data-scramble="Infographics & UI">Infographics & UI</a>
+    <a href="#" class="mega-row" data-scramble="Shapes & Cropping">Shapes & Cropping</a>
+    <a href="#" class="mega-row" data-scramble="Examples">Examples</a>
+  </div>
+  <div class="mega-content" data-panel="resources">
+    <a href="#" class="mega-row" data-scramble="Brand Archetype">Brand Archetype</a>
+    <a href="#" class="mega-row" data-scramble="Brand Attributes">Brand Attributes</a>
+    <a href="#" class="mega-row" data-scramble="Brand Values">Brand Values</a>
+  </div>
 </div>
 
 <div class="mobile-overlay" id="mobile-overlay">

@@ -4,7 +4,14 @@
   var overlay = document.getElementById("mobile-overlay");
   var navItems = document.querySelectorAll(".nav-item");
   var megaPanel = document.getElementById("mega-panel");
+  var megaContents = document.querySelectorAll(".mega-content");
   var closeTimer = null;
+
+  function showPanelContent(key) {
+    megaContents.forEach(function (content) {
+      content.classList.toggle("is-active", content.getAttribute("data-panel") === key);
+    });
+  }
 
   function onScroll() {
     header.classList.toggle("is-scrolled", window.scrollY > 8);
@@ -35,6 +42,7 @@
     });
     item.classList.add("is-open");
     item.querySelector(".nav-link").setAttribute("aria-expanded", "true");
+    showPanelContent(item.getAttribute("data-panel"));
     megaPanel.classList.add("is-open");
     header.classList.add("mega-open");
   }
