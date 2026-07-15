@@ -72,4 +72,42 @@
       header.classList.remove("mega-open");
     }
   });
+
+  // scramble reveal, adapted from kinetics (github.com/ckissi/kinetics)
+  // restricted to digits per the brand's tabular-numeral convention
+  var SCRAMBLE_CHARS = "0123456789";
+  var SCRAMBLE_FRAME_MS = 35;
+  var SCRAMBLE_TOTAL = 24;
+
+  function scramble(el) {
+    var text = el.getAttribute("data-scramble") || el.textContent;
+    if (el._scrambleTimer) clearInterval(el._scrambleTimer);
+    var frame = 0;
+    el._scrambleTimer = setInterval(function () {
+      frame++;
+      var out = "";
+      for (var i = 0; i < text.length; i++) {
+        var c = text[i];
+        if (c === " ") {
+          out += " ";
+          continue;
+        }
+        var progress = frame - i * 1.2;
+        out += progress > SCRAMBLE_TOTAL * 0.6
+          ? c
+          : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+      }
+      el.textContent = out;
+      if (frame > SCRAMBLE_TOTAL + text.length) {
+        clearInterval(el._scrambleTimer);
+        el._scrambleTimer = null;
+        el.textContent = text;
+      }
+    }, SCRAMBLE_FRAME_MS);
+  }
+
+  document.querySelectorAll(".mega-row").forEach(function (row) {
+    row.addEventListener("mouseenter", function () { scramble(row); });
+    row.addEventListener("focus", function () { scramble(row); });
+  });
 })();

@@ -131,6 +131,12 @@ a { color: inherit; }
 
 /* logo */
 
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .logo {
   font-size: 17px;
   font-weight: var(--weight-bold);
@@ -147,6 +153,17 @@ a { color: inherit; }
 .logo:focus-visible {
   transform: scale(1.04);
   opacity: 1 !important;
+}
+
+.brand-subtitle {
+  font-size: 12px;
+  font-weight: var(--weight-text);
+  color: var(--ink-muted);
+  padding-left: var(--space-2);
+  border-left: 1px solid var(--line);
+  opacity: 0;
+  animation: nav-in var(--t-reveal) var(--ease) forwards;
+  animation-delay: 40ms;
 }
 
 /* primary nav */
@@ -258,6 +275,7 @@ a { color: inherit; }
   display: block;
   font-size: var(--fs-mega);
   font-weight: var(--weight-text);
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   line-height: 1.1;
   color: var(--ink);
@@ -265,7 +283,7 @@ a { color: inherit; }
   text-align: right;
   padding: var(--space-3) 0;
   border-bottom: 1px solid var(--line);
-  transition: color var(--t-default) var(--ease), padding-right var(--t-default) var(--ease);
+  transition: color var(--t-default) var(--ease);
 }
 
 .mega-row:first-of-type { border-top: 1px solid var(--line); }
@@ -273,7 +291,6 @@ a { color: inherit; }
 .mega-row:hover,
 .mega-row:focus-visible {
   color: var(--accent);
-  padding-right: var(--space-3);
 }
 
 /* mobile menu toggle */
