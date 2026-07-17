@@ -468,7 +468,10 @@ a { color: inherit; }
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  background: rgba(0, 8, 86, 0.55);
+  /* the scrim is visual only — pointer-events stay off so the ball pit
+     behind/around the modal card is still pickable while the splash is up */
+  pointer-events: none;
+  background: rgba(0, 8, 86, 0.35);
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--t-default) var(--ease), visibility 0s linear var(--t-default);
@@ -484,6 +487,7 @@ a { color: inherit; }
   position: relative;
   width: 100%;
   max-width: 380px;
+  pointer-events: auto;
   background: var(--paper);
   color: var(--nav-text);
   border-radius: var(--nav-radius);
@@ -499,33 +503,13 @@ a { color: inherit; }
   opacity: 1;
 }
 
-.login-modal-close {
-  position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: none;
-  color: var(--ink-muted);
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  transition: color var(--t-fast) var(--ease);
-}
-
-.login-modal-close:hover,
-.login-modal-close:focus-visible {
-  color: var(--nav-text);
-}
-
 .login-modal-title {
   margin: 0 0 var(--space-4);
-  font-size: var(--fs-mega);
+  text-align: center;
+  font-size: calc(var(--fs-mega) / 2);
   font-weight: var(--weight-bold);
   color: var(--nav-text);
-  line-height: 1.15;
-  padding-right: var(--space-4);
+  line-height: 1.3;
 }
 
 .login-form {

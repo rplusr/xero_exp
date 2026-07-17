@@ -22,6 +22,15 @@
 
   function iconSrc(name) { return ICON_BASE + name; }
 
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+    }
+    return a;
+  }
+
   // ball-pit physics, ported from the react-bits Ballpit config the brief
   // referenced (count/gravity/friction/wallBounce/followCursor), swapping
   // the rendered spheres for the brand's charm icons
@@ -53,6 +62,7 @@
   var images = [];
   var pointer = { x: -9999, y: -9999, active: false };
   var resizeTimer = null;
+  var held = null;
 
   function loadImages(cb) {
     var remaining = ICON_NAMES.length;
@@ -79,24 +89,36 @@
 
   function makeBalls() {
     balls = [];
+    var order = shuffle(images);
     for (var i = 0; i < COUNT; i++) {
-      var r = 20 + Math.random() * 20;
+      var r = 30 + Math.random() * 30;
       balls.push({
         x: Math.random() * Math.max(W, 1),
         y: Math.random() * Math.max(H, 1) * 0.5,
         vx: (Math.random() - 0.5) * 3,
         vy: (Math.random() - 0.5) * 2,
         r: r,
-        img: images[i % images.length],
+        img: order[i % order.length],
         rot: Math.random() * Math.PI * 2,
         vrot: (Math.random() - 0.5) * 0.04,
         sleeping: false,
-        restFrames: 0
+        restFrames: 0,
+        isHeld: false
       });
     }
   }
 
+  function hitTestBall(cx, cy) {
+    for (var i = balls.length - 1; i >= 0; i--) {
+      var b = balls[i];
+      var dx = cx - b.x, dy = cy - b.y;
+      if (dx * dx + dy * dy <= b.r * b.r) return b;
+    }
+    return null;
+  }
+
   function resolveCollision(a, b) {
+    var heldBall = a.isHeld ? a : (b.isHeld ? b : null);
     var dx = b.x - a.x, dy = b.y - a.y;
     var dist = Math.sqrt(dx * dx + dy * dy);
     var minDist = a.r + b.r;
@@ -104,6 +126,19 @@
 
     var nx = dx / dist, ny = dy / dist;
     var overlap = minDist - dist;
+
+    if (heldBall) {
+      var other = heldBall === a ? b : a;
+      var sign = heldBall === a ? 1 : -1;
+      other.x += sign * nx * overlap;
+      other.y += sign * ny * overlap;
+      other.vx += sign * nx * 2 + heldBall.vx * 0.4;
+      other.vy += sign * ny * 2 + heldBall.vy * 0.4;
+      other.sleeping = false;
+      other.restFrames = 0;
+      return;
+    }
+
     a.x -= nx * overlap * 0.5;
     a.y -= ny * overlap * 0.5;
     b.x += nx * overlap * 0.5;
@@ -124,7 +159,7 @@
     var i, b;
     for (i = 0; i < balls.length; i++) {
       b = balls[i];
-      if (b.sleeping) continue;
+      if (b.isHeld || b.sleeping) continue;
 
       if (!reduceMotion) b.vy += GRAVITY;
       b.vx *= FRICTION;
@@ -198,6 +233,16 @@
       ctx.rotate(b.rot);
       ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
+      if (b.isHeld) {
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.beginPath();
+        ctx.arc(0, 0, b.r + 5, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(255,255,255,0.7)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+      }
     }
   }
 
@@ -218,24 +263,43 @@
     pointer.active = false;
   }
 
-  function onClick(e) {
+  function onCanvasDown(e) {
     var rect = host.getBoundingClientRect();
     var cx = e.clientX - rect.left;
     var cy = e.clientY - rect.top;
-    for (var i = balls.length - 1; i >= 0; i--) {
-      var b = balls[i];
-      var dx = cx - b.x, dy = cy - b.y;
-      if (dx * dx + dy * dy <= b.r * b.r) {
-        b.sleeping = false;
-        b.restFrames = 0;
-        var angle = Math.random() * Math.PI * 2;
-        var force = 9 + Math.random() * 5;
-        b.vx += Math.cos(angle) * force;
-        b.vy += Math.sin(angle) * force - 6;
-        b.vrot += (Math.random() - 0.5) * 0.3;
-        break;
-      }
+    var hit = hitTestBall(cx, cy);
+    if (!hit) return;
+    held = hit;
+    held.isHeld = true;
+    held.sleeping = false;
+    held.restFrames = 0;
+    held.vx = 0;
+    held.vy = 0;
+    held.vrot = 0;
+    if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+    canvas.style.cursor = "grabbing";
+  }
+
+  function onCanvasMove(e) {
+    if (!held) return;
+    var rect = host.getBoundingClientRect();
+    var cx = e.clientX - rect.left;
+    var cy = e.clientY - rect.top;
+    cx = Math.max(held.r, Math.min(W - held.r, cx));
+    cy = Math.max(held.r, Math.min(H - held.r, cy));
+    held.vx = cx - held.x;
+    held.vy = cy - held.y;
+    held.x = cx;
+    held.y = cy;
+  }
+
+  function onCanvasUp() {
+    if (held) {
+      held.isHeld = false;
+      held.restFrames = 0;
+      held = null;
     }
+    canvas.style.cursor = "pointer";
   }
 
   function onResize() {
@@ -247,7 +311,10 @@
     host.addEventListener("pointermove", onPointerMove);
     host.addEventListener("pointerleave", onPointerLeave);
   }
-  canvas.addEventListener("click", onClick);
+  canvas.addEventListener("pointerdown", onCanvasDown);
+  canvas.addEventListener("pointermove", onCanvasMove);
+  canvas.addEventListener("pointerup", onCanvasUp);
+  canvas.addEventListener("pointercancel", onCanvasUp);
   window.addEventListener("resize", onResize);
 
   loadImages(function () {
