@@ -510,8 +510,8 @@ a { color: inherit; }
   border-radius: var(--nav-radius);
   box-shadow:
     var(--header-shadow),
-    0 0 0 1px rgba(19, 181, 234, calc(0.3 + 0.3 * var(--glow))),
-    0 0 calc(16px + 44px * var(--glow)) rgba(19, 181, 234, calc(0.22 + 0.45 * var(--glow)));
+    0 0 0 1px rgba(19, 181, 234, calc(0.2 + 0.6 * var(--glow))),
+    0 0 calc(10px + 70px * var(--glow)) rgba(19, 181, 234, calc(0.12 + 0.7 * var(--glow)));
   padding: var(--space-5) var(--space-4) var(--space-4);
   transform: translateY(12px) scale(0.98);
   opacity: 0;
@@ -607,14 +607,54 @@ a { color: inherit; }
   cursor: pointer;
 }
 
-.login-remember input {
-  accent-color: var(--accent);
-  width: 15px;
-  height: 15px;
+.login-checkbox-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.login-checkbox-box {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.login-checkbox-mark {
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+  color: var(--paper);
+  transition: stroke-dashoffset var(--t-default) var(--ease);
+}
+
+.login-checkbox-input:checked + .login-checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.login-checkbox-input:checked + .login-checkbox-box .login-checkbox-mark {
+  stroke-dashoffset: 0;
+}
+
+.login-checkbox-input:focus-visible + .login-checkbox-box {
+  border-color: var(--accent);
 }
 
 .login-submit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-top: var(--space-2);
+  width: 100%;
   background: var(--accent);
   color: var(--paper);
   border: none;
@@ -624,7 +664,9 @@ a { color: inherit; }
   font-size: var(--fs-small);
   font-weight: var(--weight-bold);
   cursor: pointer;
-  transition: opacity var(--t-fast) var(--ease);
+  overflow: hidden;
+  transition: opacity var(--t-fast) var(--ease), width var(--t-default) var(--ease),
+    border-radius var(--t-default) var(--ease), background-color var(--t-default) var(--ease);
 }
 
 .login-submit:hover,
@@ -633,8 +675,46 @@ a { color: inherit; }
 }
 
 .login-submit:disabled {
-  opacity: 0.6;
+  opacity: 1;
   cursor: default;
+}
+
+.login-submit-label {
+  transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+}
+
+.login-submit-check {
+  position: absolute;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+}
+
+.login-submit-check path {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  transition: stroke-dashoffset 320ms var(--ease) 120ms;
+}
+
+.login-submit.is-success {
+  width: 44px;
+  padding: 0;
+  border-radius: 999px;
+  background: #17C964;
+}
+
+.login-submit.is-success .login-submit-label {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.login-submit.is-success .login-submit-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.login-submit.is-success .login-submit-check path {
+  stroke-dashoffset: 0;
 }
 
 /* ---------------------------------------------------------------- */

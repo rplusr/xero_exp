@@ -5,6 +5,8 @@
   var form = document.getElementById("login-form");
   var passwordInput = document.getElementById("login-password");
   var passwordToggle = document.getElementById("login-password-toggle");
+  var submitBtn = document.getElementById("login-submit");
+  var submitLabel = submitBtn ? submitBtn.querySelector(".login-submit-label") : null;
   if (!overlay || !form) return;
 
   // this modal is the site's splash gate, not a dismissible dialog —
@@ -18,14 +20,19 @@
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    var submitBtn = form.querySelector(".login-submit");
-    var original = submitBtn.textContent;
-    submitBtn.textContent = "Signing in…";
+    if (!submitBtn || submitBtn.disabled) return;
+    var original = submitLabel.textContent;
     submitBtn.disabled = true;
+    submitLabel.textContent = "Signing in…";
     setTimeout(function () {
-      submitBtn.textContent = original;
-      submitBtn.disabled = false;
-    }, 700);
+      // stubbed: every submission succeeds for now, no real auth backend
+      submitBtn.classList.add("is-success");
+      setTimeout(function () {
+        submitBtn.classList.remove("is-success");
+        submitLabel.textContent = original;
+        submitBtn.disabled = false;
+      }, 1400);
+    }, 500);
   });
 
   if (passwordToggle && passwordInput) {
@@ -37,10 +44,10 @@
     });
   }
 
-  // light-blue border glow that strengthens the closer the pointer gets
-  // to the modal's edges (0 once inside/touching, fading out over GLOW_RADIUS)
+  // light-blue border glow that brightens the closer the pointer gets to
+  // the modal's edges (0 once inside/touching, fading out over GLOW_RADIUS)
   if (modal) {
-    var GLOW_RADIUS = 140;
+    var GLOW_RADIUS = 220;
     var targetGlow = 0;
     var currentGlow = 0;
 
@@ -53,7 +60,7 @@
     };
 
     var glowTick = function () {
-      currentGlow += (targetGlow - currentGlow) * 0.15;
+      currentGlow += (targetGlow - currentGlow) * 0.25;
       modal.style.setProperty("--glow", currentGlow.toFixed(3));
       requestAnimationFrame(glowTick);
     };

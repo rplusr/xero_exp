@@ -35,7 +35,7 @@
   // referenced (count/gravity/friction/wallBounce/followCursor), swapping
   // the rendered spheres for the brand's charm icons
   var COUNT = 20;
-  var BALL_RADIUS = 45;
+  var BALL_RADIUS = 56;
   var GRAVITY = 0.6;
   var FRICTION = 0.919;
   var WALL_BOUNCE = 0.75;
