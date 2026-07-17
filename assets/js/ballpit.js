@@ -35,6 +35,7 @@
   // referenced (count/gravity/friction/wallBounce/followCursor), swapping
   // the rendered spheres for the brand's charm icons
   var COUNT = 20;
+  var BALL_RADIUS = 45;
   var GRAVITY = 0.6;
   var FRICTION = 0.919;
   var WALL_BOUNCE = 0.75;
@@ -90,14 +91,15 @@
   function makeBalls() {
     balls = [];
     var order = shuffle(images);
+    var cx = Math.max(W, 1) / 2;
+    var cy = Math.max(H, 1) / 2;
     for (var i = 0; i < COUNT; i++) {
-      var r = 30 + Math.random() * 30;
       balls.push({
-        x: Math.random() * Math.max(W, 1),
-        y: Math.random() * Math.max(H, 1) * 0.5,
+        x: cx + (Math.random() - 0.5) * 80,
+        y: cy + (Math.random() - 0.5) * 80,
         vx: (Math.random() - 0.5) * 3,
         vy: (Math.random() - 0.5) * 2,
-        r: r,
+        r: BALL_RADIUS,
         img: order[i % order.length],
         rot: Math.random() * Math.PI * 2,
         vrot: (Math.random() - 0.5) * 0.04,
