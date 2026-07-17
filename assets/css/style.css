@@ -81,7 +81,7 @@ body {
 a { color: inherit; }
 
 /* ---------------------------------------------------------------- */
-/* Infinite image grid — flat torus, panned via background-position  */
+/* Image grid — physics ball pit of brand charm icons                */
 /* ---------------------------------------------------------------- */
 
 .grid-section {
@@ -90,24 +90,14 @@ a { color: inherit; }
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  cursor: grab;
-  touch-action: none;
 }
 
-.grid-section.is-dragging { cursor: grabbing; }
-
-.grid-warp {
+.ballpit-canvas {
   position: absolute;
   inset: 0;
-  perspective: 800px;
-  transform-style: preserve-3d;
-}
-
-.grid-tile {
-  position: absolute;
-  background-image: url("../img/torus-grid.png");
-  background-repeat: repeat;
-  backface-visibility: hidden;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .grid-vignette {
