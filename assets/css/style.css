@@ -677,18 +677,24 @@ a { color: inherit; }
   justify-content: center;
   margin-top: var(--space-2);
   width: 100%;
+  /* height is fixed (not intrinsic) so it never has to transition — only
+     width + border-radius animate, both bounded by this same 33px, so the
+     corner radius can ease evenly toward a true circle (16.5px = exactly
+     half of 33 on both axes) instead of getting clamped on one axis once
+     width outpaced a mismatched, non-square target like the old 44x±33 */
+  height: 33px;
   background: var(--accent);
   color: var(--paper);
   border: none;
   border-radius: 10px;
-  padding: var(--space-2) var(--space-4);
+  padding: 0 var(--space-4);
   font-family: var(--font);
   font-size: var(--fs-small);
   font-weight: var(--weight-medium);
   cursor: pointer;
   overflow: hidden;
-  transition: opacity var(--t-fast) var(--ease), width var(--t-default) var(--ease),
-    border-radius var(--t-default) var(--ease), background-color var(--t-default) var(--ease);
+  transition: opacity var(--t-fast) var(--ease), width 320ms var(--ease),
+    border-radius 320ms var(--ease), background-color 320ms var(--ease);
 }
 
 .login-submit:hover,
@@ -702,7 +708,7 @@ a { color: inherit; }
 }
 
 .login-submit-label {
-  transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+  transition: opacity 200ms var(--ease), transform 200ms var(--ease);
 }
 
 .login-submit-check {
@@ -710,20 +716,20 @@ a { color: inherit; }
   top: 50%;
   left: 50%;
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.5);
-  transition: opacity 150ms var(--ease), transform 150ms var(--ease);
+  transform: translate(-50%, -50%) scale(0.4);
+  transition: opacity 200ms var(--ease) 120ms;
 }
 
 .login-submit-check path {
   stroke-dasharray: 30;
   stroke-dashoffset: 30;
-  transition: stroke-dashoffset 320ms var(--ease) 120ms;
+  transition: stroke-dashoffset 280ms var(--ease) 200ms;
 }
 
 .login-submit.is-success {
-  width: 44px;
+  width: 33px;
   padding: 0;
-  border-radius: 999px;
+  border-radius: 16.5px;
   background: #17C964;
 }
 
@@ -734,11 +740,17 @@ a { color: inherit; }
 
 .login-submit.is-success .login-submit-check {
   opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+  animation: login-check-pop 320ms var(--ease) 120ms both;
 }
 
 .login-submit.is-success .login-submit-check path {
   stroke-dashoffset: 0;
+}
+
+@keyframes login-check-pop {
+  0% { transform: translate(-50%, -50%) scale(0.4); }
+  60% { transform: translate(-50%, -50%) scale(1.15); }
+  100% { transform: translate(-50%, -50%) scale(1); }
 }
 
 .login-request-link {
@@ -783,4 +795,8 @@ a { color: inherit; }
   }
   .mobile-overlay, .mega-panel { transform: none; }
   .mobile-sublist-wrap { transition: none; }
+  .login-submit.is-success .login-submit-check {
+    animation: none;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
