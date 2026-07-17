@@ -49,6 +49,17 @@
   var WAKE_LINEAR_EPS = 0.08;
   var WAKE_ANGULAR_EPS = 0.004;
 
+  // tilt.js (if present/permitted) writes window.__ballpitGravity = {x,y}
+  // from the device's accelerometer; smoothed toward here each frame so the
+  // pit reacts like a tilted tray instead of always falling straight down.
+  // Falls back to plain downward GRAVITY on desktop or without permission.
+  var GRAVITY_LERP = 0.08;
+  var WAKE_GRAVITY_DELTA = 0.05;
+  var curGravityX = 0;
+  var curGravityY = GRAVITY;
+  var lastWakeGravityX = 0;
+  var lastWakeGravityY = GRAVITY;
+
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var canvas = document.createElement("canvas");
@@ -159,11 +170,41 @@
 
   function step() {
     var i, b;
+
+    if (!reduceMotion) {
+      var targetGX = 0;
+      var targetGY = GRAVITY;
+      if (window.__ballpitGravity) {
+        targetGX = window.__ballpitGravity.x;
+        targetGY = window.__ballpitGravity.y;
+      }
+      curGravityX += (targetGX - curGravityX) * GRAVITY_LERP;
+      curGravityY += (targetGY - curGravityY) * GRAVITY_LERP;
+
+      // a real tilt (not just sensor jitter) should rouse the settled pile
+      // so it re-pools toward the new low point, same as a real tray would.
+      // lastWake* only updates when a wake actually fires (not every frame),
+      // so gradual lerp steps still accumulate to a real, comparable shift
+      // instead of always being measured against the previous tiny step
+      if (Math.abs(curGravityX - lastWakeGravityX) > WAKE_GRAVITY_DELTA ||
+          Math.abs(curGravityY - lastWakeGravityY) > WAKE_GRAVITY_DELTA) {
+        for (i = 0; i < balls.length; i++) {
+          balls[i].sleeping = false;
+          balls[i].restFrames = 0;
+        }
+        lastWakeGravityX = curGravityX;
+        lastWakeGravityY = curGravityY;
+      }
+    }
+
     for (i = 0; i < balls.length; i++) {
       b = balls[i];
       if (b.isHeld || b.sleeping) continue;
 
-      if (!reduceMotion) b.vy += GRAVITY;
+      if (!reduceMotion) {
+        b.vx += curGravityX;
+        b.vy += curGravityY;
+      }
       b.vx *= FRICTION;
       b.vy *= FRICTION;
       b.vrot *= FRICTION;

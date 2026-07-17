@@ -486,6 +486,56 @@ a { color: inherit; }
 }
 
 /* ---------------------------------------------------------------- */
+/* Tilt-to-play permission prompt (device accelerometer gravity)      */
+/* ---------------------------------------------------------------- */
+
+.tilt-permission-btn {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translateX(-50%);
+  z-index: 150;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--paper);
+  color: var(--nav-text);
+  border: none;
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  box-shadow: var(--header-shadow);
+  transition: opacity var(--t-default) var(--ease), transform var(--t-default) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.tilt-permission-btn:hover,
+.tilt-permission-btn:focus-visible {
+  color: var(--accent);
+}
+
+.tilt-permission-btn.is-active {
+  color: var(--accent);
+}
+
+.tilt-permission-btn.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(12px);
+  pointer-events: none;
+}
+
+.tilt-permission-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.tilt-btn-icon {
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------- */
 /* Login modal                                                        */
 /* ---------------------------------------------------------------- */
 
