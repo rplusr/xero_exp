@@ -479,7 +479,9 @@ a { color: inherit; }
 .login-overlay {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  /* sits behind the mega-panel dropdown (z-index 95) so the nav's
+     mega-menu always renders in front of the splash modal */
+  z-index: 80;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -523,6 +525,13 @@ a { color: inherit; }
   opacity: 1;
 }
 
+.login-modal-logo {
+  display: block;
+  height: 20px;
+  width: auto;
+  margin: 0 auto var(--space-3);
+}
+
 .login-modal-title {
   margin: 0 0 var(--space-4);
   text-align: center;
@@ -543,7 +552,7 @@ a { color: inherit; }
   flex-direction: column;
   gap: var(--space-1);
   font-size: var(--fs-label);
-  color: rgba(255, 255, 255, 0.6);
+  color: #FFFFFF;
 }
 
 .login-field input {
@@ -662,7 +671,7 @@ a { color: inherit; }
   padding: var(--space-2) var(--space-4);
   font-family: var(--font);
   font-size: var(--fs-small);
-  font-weight: var(--weight-bold);
+  font-weight: var(--weight-medium);
   cursor: pointer;
   overflow: hidden;
   transition: opacity var(--t-fast) var(--ease), width var(--t-default) var(--ease),
@@ -685,8 +694,10 @@ a { color: inherit; }
 
 .login-submit-check {
   position: absolute;
+  top: 50%;
+  left: 50%;
   opacity: 0;
-  transform: scale(0.5);
+  transform: translate(-50%, -50%) scale(0.5);
   transition: opacity 150ms var(--ease), transform 150ms var(--ease);
 }
 
@@ -710,11 +721,26 @@ a { color: inherit; }
 
 .login-submit.is-success .login-submit-check {
   opacity: 1;
-  transform: scale(1);
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .login-submit.is-success .login-submit-check path {
   stroke-dashoffset: 0;
+}
+
+.login-request-link {
+  display: block;
+  text-align: center;
+  font-size: var(--fs-label);
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.login-request-link:hover,
+.login-request-link:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
 }
 
 /* ---------------------------------------------------------------- */
