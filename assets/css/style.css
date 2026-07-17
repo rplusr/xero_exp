@@ -68,6 +68,8 @@
 
 html { scroll-behavior: smooth; }
 
+body.modal-open { overflow: hidden; }
+
 body {
   margin: 0;
   background: var(--page-bg);
@@ -98,14 +100,6 @@ a { color: inherit; }
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.grid-vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  box-shadow: inset 0 0 160px 50px var(--page-bg);
 }
 
 /* ---------------------------------------------------------------- */
@@ -460,6 +454,131 @@ a { color: inherit; }
 .mobile-link:hover::after,
 .mobile-link:focus-visible::after {
   transform: scaleX(1);
+}
+
+/* ---------------------------------------------------------------- */
+/* Login modal                                                        */
+/* ---------------------------------------------------------------- */
+
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: rgba(0, 8, 86, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--t-default) var(--ease), visibility 0s linear var(--t-default);
+}
+
+.login-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--t-default) var(--ease), visibility 0s linear;
+}
+
+.login-modal {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: var(--paper);
+  color: var(--nav-text);
+  border-radius: var(--nav-radius);
+  box-shadow: var(--header-shadow);
+  padding: var(--space-5) var(--space-4) var(--space-4);
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+  transition: transform var(--t-default) var(--ease), opacity var(--t-default) var(--ease);
+}
+
+.login-overlay.is-open .login-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.login-modal-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease);
+}
+
+.login-modal-close:hover,
+.login-modal-close:focus-visible {
+  color: var(--nav-text);
+}
+
+.login-modal-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-mega);
+  font-weight: var(--weight-bold);
+  color: var(--nav-text);
+  line-height: 1.15;
+  padding-right: var(--space-4);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--fs-label);
+  color: var(--ink-muted);
+}
+
+.login-field input {
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  color: var(--nav-text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: var(--space-2) var(--space-3);
+  outline: none;
+  transition: border-color var(--t-fast) var(--ease);
+}
+
+.login-field input:focus-visible {
+  border-color: var(--accent);
+}
+
+.login-submit {
+  margin-top: var(--space-2);
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  transition: opacity var(--t-fast) var(--ease);
+}
+
+.login-submit:hover,
+.login-submit:focus-visible {
+  opacity: 0.88;
+}
+
+.login-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* ---------------------------------------------------------------- */

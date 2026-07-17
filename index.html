@@ -53,14 +53,14 @@
         </ul>
       </nav>
 
-      <a href="#" class="login-btn">
+      <button type="button" class="login-btn" id="login-trigger">
         <svg class="login-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
           <polyline points="10 17 15 12 10 7"/>
           <line x1="15" y1="12" x2="3" y2="12"/>
         </svg>
         <span>Log in</span>
-      </a>
+      </button>
 
       <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-overlay">
         <span class="menu-toggle-label">menu</span>
@@ -105,12 +105,29 @@
 </div>
 
 <main>
-  <section class="grid-section" id="grid-host" aria-label="Image grid">
-    <div class="grid-vignette" aria-hidden="true"></div>
-  </section>
+  <section class="grid-section" id="grid-host" aria-label="Image grid"></section>
 </main>
+
+<div class="login-overlay" id="login-overlay" aria-hidden="true">
+  <div class="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-title">
+    <button type="button" class="login-modal-close" id="login-close" aria-label="Close">&times;</button>
+    <h2 id="login-title" class="login-modal-title">Welcome to Xero&rsquo;s Brand Guidelines</h2>
+    <form id="login-form" class="login-form">
+      <label class="login-field">
+        <span>Username</span>
+        <input type="text" name="username" autocomplete="username" required />
+      </label>
+      <label class="login-field">
+        <span>Password</span>
+        <input type="password" name="password" autocomplete="current-password" required />
+      </label>
+      <button type="submit" class="login-submit">Log in</button>
+    </form>
+  </div>
+</div>
 
 <script src="assets/js/main.js"></script>
 <script src="assets/js/ballpit.js"></script>
+<script src="assets/js/login-modal.js"></script>
 </body>
 </html>

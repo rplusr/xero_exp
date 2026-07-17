@@ -25,16 +25,25 @@
   // ball-pit physics, ported from the react-bits Ballpit config the brief
   // referenced (count/gravity/friction/wallBounce/followCursor), swapping
   // the rendered spheres for the brand's charm icons
-  var COUNT = 50;
+  var COUNT = 20;
   var GRAVITY = 0.6;
   var FRICTION = 0.919;
   var WALL_BOUNCE = 0.75;
   var FOLLOW_CURSOR = false;
 
+  // once a ball's linear + angular speed drops below this for SLEEP_FRAMES
+  // in a row, it freezes completely rather than drifting/spinning forever
+  var SLEEP_LINEAR_EPS = 0.04;
+  var SLEEP_ANGULAR_EPS = 0.002;
+  var SLEEP_FRAMES = 40;
+  var WAKE_LINEAR_EPS = 0.08;
+  var WAKE_ANGULAR_EPS = 0.004;
+
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var canvas = document.createElement("canvas");
   canvas.className = "ballpit-canvas";
+  canvas.style.cursor = "pointer";
   host.insertBefore(canvas, host.firstChild);
   var ctx = canvas.getContext("2d");
 
@@ -71,7 +80,7 @@
   function makeBalls() {
     balls = [];
     for (var i = 0; i < COUNT; i++) {
-      var r = 16 + Math.random() * 16;
+      var r = 20 + Math.random() * 20;
       balls.push({
         x: Math.random() * Math.max(W, 1),
         y: Math.random() * Math.max(H, 1) * 0.5,
@@ -80,7 +89,9 @@
         r: r,
         img: images[i % images.length],
         rot: Math.random() * Math.PI * 2,
-        vrot: (Math.random() - 0.5) * 0.04
+        vrot: (Math.random() - 0.5) * 0.04,
+        sleeping: false,
+        restFrames: 0
       });
     }
   }
@@ -113,9 +124,12 @@
     var i, b;
     for (i = 0; i < balls.length; i++) {
       b = balls[i];
+      if (b.sleeping) continue;
+
       if (!reduceMotion) b.vy += GRAVITY;
       b.vx *= FRICTION;
       b.vy *= FRICTION;
+      b.vrot *= FRICTION;
 
       if (FOLLOW_CURSOR && pointer.active) {
         var dx = b.x - pointer.x, dy = b.y - pointer.y;
@@ -136,13 +150,35 @@
       if (b.x + b.r > W) { b.x = W - b.r; b.vx = -b.vx * WALL_BOUNCE; }
       if (b.y - b.r < 0) { b.y = b.r; b.vy = -b.vy * WALL_BOUNCE; }
       if (b.y + b.r > H) { b.y = H - b.r; b.vy = -b.vy * WALL_BOUNCE; }
+
+      if (Math.abs(b.vx) + Math.abs(b.vy) < SLEEP_LINEAR_EPS && Math.abs(b.vrot) < SLEEP_ANGULAR_EPS) {
+        b.restFrames++;
+        if (b.restFrames > SLEEP_FRAMES) {
+          b.sleeping = true;
+          b.vx = 0;
+          b.vy = 0;
+          b.vrot = 0;
+        }
+      } else {
+        b.restFrames = 0;
+      }
     }
 
     for (var pass = 0; pass < 2; pass++) {
       for (var m = 0; m < balls.length; m++) {
         for (var n = m + 1; n < balls.length; n++) {
-          resolveCollision(balls[m], balls[n]);
+          var ballA = balls[m], ballB = balls[n];
+          if (ballA.sleeping && ballB.sleeping) continue;
+          resolveCollision(ballA, ballB);
         }
+      }
+    }
+
+    for (i = 0; i < balls.length; i++) {
+      b = balls[i];
+      if (b.sleeping && (Math.abs(b.vx) + Math.abs(b.vy) > WAKE_LINEAR_EPS || Math.abs(b.vrot) > WAKE_ANGULAR_EPS)) {
+        b.sleeping = false;
+        b.restFrames = 0;
       }
     }
   }
@@ -151,12 +187,16 @@
     ctx.clearRect(0, 0, W, H);
     for (var i = 0; i < balls.length; i++) {
       var b = balls[i];
-      if (!b.img || !b.img.complete || !b.img.naturalWidth) continue;
-      var size = b.r * 2;
+      var img = b.img;
+      if (!img || !img.complete || !img.naturalWidth) continue;
+      var maxNat = Math.max(img.naturalWidth, img.naturalHeight);
+      var scale = (b.r * 2) / maxNat;
+      var drawW = img.naturalWidth * scale;
+      var drawH = img.naturalHeight * scale;
       ctx.save();
       ctx.translate(b.x, b.y);
       ctx.rotate(b.rot);
-      ctx.drawImage(b.img, -b.r, -b.r, size, size);
+      ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
     }
   }
@@ -178,6 +218,26 @@
     pointer.active = false;
   }
 
+  function onClick(e) {
+    var rect = host.getBoundingClientRect();
+    var cx = e.clientX - rect.left;
+    var cy = e.clientY - rect.top;
+    for (var i = balls.length - 1; i >= 0; i--) {
+      var b = balls[i];
+      var dx = cx - b.x, dy = cy - b.y;
+      if (dx * dx + dy * dy <= b.r * b.r) {
+        b.sleeping = false;
+        b.restFrames = 0;
+        var angle = Math.random() * Math.PI * 2;
+        var force = 9 + Math.random() * 5;
+        b.vx += Math.cos(angle) * force;
+        b.vy += Math.sin(angle) * force - 6;
+        b.vrot += (Math.random() - 0.5) * 0.3;
+        break;
+      }
+    }
+  }
+
   function onResize() {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(resize, 150);
@@ -187,6 +247,7 @@
     host.addEventListener("pointermove", onPointerMove);
     host.addEventListener("pointerleave", onPointerLeave);
   }
+  canvas.addEventListener("click", onClick);
   window.addEventListener("resize", onResize);
 
   loadImages(function () {
