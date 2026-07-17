@@ -53,13 +53,12 @@
         </ul>
       </nav>
 
-      <button type="button" class="login-btn" id="login-trigger">
-        <span>Log in</span>
-      </button>
-
       <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-overlay">
-        <span class="menu-toggle-label">menu</span>
-        <span class="menu-toggle-icon" aria-hidden="true"></span>
+        <span class="menu-toggle-icon" aria-hidden="true">
+          <span class="menu-toggle-bar"></span>
+          <span class="menu-toggle-bar"></span>
+          <span class="menu-toggle-bar"></span>
+        </span>
       </button>
     </div>
   </div>
@@ -92,9 +91,63 @@
 <div class="mobile-overlay" id="mobile-overlay">
   <nav aria-label="Primary mobile">
     <ul>
-      <li><a href="#" class="mobile-link" data-scramble="Principles">Principles</a></li>
-      <li><a href="#" class="mobile-link" data-scramble="Expression">Expression</a></li>
-      <li><a href="#" class="mobile-link" data-scramble="Resources">Resources</a></li>
+      <li class="mobile-item" data-panel="principles">
+        <button type="button" class="mobile-link" data-scramble="Principles" aria-expanded="false">
+          <span>Principles</span>
+          <span class="mobile-chevron" aria-hidden="true">
+            <svg width="12" height="7" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="mobile-sublist-wrap">
+          <ul class="mobile-sublist">
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Archetype">Brand Archetype</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Attributes">Brand Attributes</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Values">Brand Values</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mobile-item" data-panel="expression">
+        <button type="button" class="mobile-link" data-scramble="Expression" aria-expanded="false">
+          <span>Expression</span>
+          <span class="mobile-chevron" aria-hidden="true">
+            <svg width="12" height="7" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="mobile-sublist-wrap">
+          <ul class="mobile-sublist">
+            <li><a href="#" class="mobile-sublink" data-scramble="Logo">Logo</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Colour">Colour</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Wordmark & Lockups">Wordmark & Lockups</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Typography">Typography</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Illustration">Illustration</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Photography">Photography</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Infographics & UI">Infographics & UI</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Shapes & Cropping">Shapes & Cropping</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Examples">Examples</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mobile-item" data-panel="resources">
+        <button type="button" class="mobile-link" data-scramble="Resources" aria-expanded="false">
+          <span>Resources</span>
+          <span class="mobile-chevron" aria-hidden="true">
+            <svg width="12" height="7" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="mobile-sublist-wrap">
+          <ul class="mobile-sublist">
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Archetype">Brand Archetype</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Attributes">Brand Attributes</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Values">Brand Values</a></li>
+          </ul>
+        </div>
+      </li>
     </ul>
   </nav>
 </div>
