@@ -37,7 +37,7 @@ function cylinderPoint(u, v, amount) {
 // Simulates an accordion fold: N flat panels of equal width, hinged and
 // tilted alternately toward/away from the viewer.
 
-const FOLD_COUNT = 6;
+export const FOLD_COUNT = 6;
 const FOLD_TILT_MAX = 1.309; // ~75deg
 
 function buildFoldTable(amount) {

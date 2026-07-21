@@ -1,0 +1,30 @@
+// Fixed brand palette. All fills and pattern colours are chosen from here —
+// no free colour picker, no gradients.
+
+export const PALETTE = [
+  { name: 'Xero blue', hex: '#3ECCFF' },
+  { name: 'XUI blue', hex: '#1F65D6' },
+  { name: 'Midnight', hex: '#000856' },
+  { name: 'White', hex: '#FFFFFF' },
+  { name: 'Warm grey', hex: '#F2F1EE' },
+  { name: 'Mid grey', hex: '#CBCAC9' },
+  { name: 'Light blue', hex: '#9FE5FF' },
+  { name: 'Light pink', hex: '#FFC4D2' },
+  { name: 'Light yellow', hex: '#FFEF9F' },
+  { name: 'Light green', hex: '#ABFFD1' },
+  { name: 'Lilac', hex: '#D9C6FF' },
+  { name: 'Coral', hex: '#FF719B' },
+  { name: 'Gold', hex: '#FDCC08' },
+  { name: 'Mint', hex: '#6AEAAA' },
+  { name: 'Purple', hex: '#CF89FE' },
+  { name: 'Mid blue', hex: '#009DEB' },
+  { name: 'Rose', hex: '#F14B6A' },
+  { name: 'Copper', hex: '#E99000' },
+  { name: 'Green', hex: '#2DB879' },
+  { name: 'Violet', hex: '#A035E7' },
+  { name: 'Dark blue', hex: '#184390' },
+  { name: 'Wine', hex: '#772635' },
+  { name: 'Bronze', hex: '#954300' },
+  { name: 'Pine', hex: '#186241' },
+  { name: 'Indigo', hex: '#4C1392' },
+];

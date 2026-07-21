@@ -2,6 +2,8 @@
 // `project(u, v)` maps surface space to canvas space (through the sheet's
 // warp + transform), so every mark bends with the sheet it's drawn on.
 
+import { TEXTURES } from './textures.js';
+
 function clamp01(x) {
   return Math.max(0, Math.min(1, x));
 }
@@ -160,52 +162,103 @@ function chevronWeave(project, params) {
   ];
 }
 
+// Petal weave: stamps a Xero petal/leaf motif in offset rows, following the
+// same row/period/amplitude weave layout as the chevron pattern. Each stamp
+// is placed by projecting its centre point through the warp, then rotating
+// alternate rows so the petals appear to flow along the ribbon.
+function petalWeave(project, params, unitScale) {
+  const {
+    rowHeight = 0.12,
+    period = 0.16,
+    amplitude = 0.03,
+    scale = 0.9,
+    color = '#3ECCFF',
+  } = params;
+  const tex = TEXTURES.leaf;
+  const maxDim = Math.max(tex.w, tex.h);
+  const MARGIN = period;
+
+  const marks = [];
+  let row = 0;
+  for (let v0 = rowHeight / 2; v0 < 1; v0 += rowHeight, row++) {
+    const phase = (row % 2) * (period / 2);
+    let idx = 0;
+    for (let u = -MARGIN + phase; u <= 1 + MARGIN; u += period, idx++) {
+      const vOff = idx % 2 === 0 ? -amplitude : amplitude;
+      const c = project(u, v0 + vOff);
+      const sizePx = scale * period * unitScale;
+      const k = sizePx / maxDim;
+      const rotation = row % 2 === 0 ? 0 : 180;
+      marks.push({
+        type: 'path',
+        d: tex.d,
+        fill: color,
+        stroke: 'none',
+        transform: `translate(${c.x.toFixed(2)},${c.y.toFixed(2)}) rotate(${rotation}) scale(${k.toFixed(4)}) translate(${(-tex.w / 2).toFixed(2)},${(-tex.h / 2).toFixed(2)})`,
+      });
+    }
+  }
+  return marks;
+}
+
 export const PATTERNS = {
   crossHalftone: {
     label: 'Cross Halftone',
-    defaults: { spacing: 0.045, minSize: 0.2, maxSize: 1.0, invert: false, strokeWidth: 1.4, color: '#e11d3f' },
+    defaults: { spacing: 0.045, minSize: 0.2, maxSize: 1.0, invert: false, strokeWidth: 1.4, color: '#F14B6A' },
     paramsSchema: [
       { key: 'spacing', label: 'Spacing', type: 'range', min: 0.015, max: 0.09, step: 0.001 },
       { key: 'minSize', label: 'Min size', type: 'range', min: 0, max: 1, step: 0.01 },
       { key: 'maxSize', label: 'Max size', type: 'range', min: 0, max: 1.4, step: 0.01 },
       { key: 'strokeWidth', label: 'Stroke width', type: 'range', min: 0.4, max: 4, step: 0.1 },
-      { key: 'color', label: 'Colour', type: 'color' },
-      { key: 'invert', label: 'Invert gradient', type: 'checkbox' },
+      { key: 'color', label: 'Colour', type: 'swatch' },
+      { key: 'invert', label: 'Invert density', type: 'checkbox' },
     ],
     render: crossHalftone,
   },
   diagonalHatch: {
     label: 'Diagonal Hatch',
-    defaults: { spacing: 0.05, angleDeg: 45, strokeWidth: 1.2, color: '#1c2340', samples: 10 },
+    defaults: { spacing: 0.05, angleDeg: 45, strokeWidth: 1.2, color: '#000856', samples: 10 },
     paramsSchema: [
       { key: 'spacing', label: 'Spacing', type: 'range', min: 0.02, max: 0.12, step: 0.001 },
       { key: 'angleDeg', label: 'Angle', type: 'range', min: -90, max: 90, step: 1 },
       { key: 'strokeWidth', label: 'Stroke width', type: 'range', min: 0.4, max: 5, step: 0.1 },
-      { key: 'color', label: 'Colour', type: 'color' },
+      { key: 'color', label: 'Colour', type: 'swatch' },
     ],
     render: diagonalHatch,
   },
   checkerDiamonds: {
     label: 'Checker Diamonds',
-    defaults: { spacing: 0.09, colorA: '#0b1130', colorB: '#ff2d55', gap: 0.12 },
+    defaults: { spacing: 0.09, colorA: '#000856', colorB: '#F14B6A', gap: 0.12 },
     paramsSchema: [
       { key: 'spacing', label: 'Spacing', type: 'range', min: 0.03, max: 0.18, step: 0.001 },
       { key: 'gap', label: 'Gap', type: 'range', min: 0, max: 0.4, step: 0.01 },
-      { key: 'colorA', label: 'Colour A', type: 'color' },
-      { key: 'colorB', label: 'Colour B', type: 'color' },
+      { key: 'colorA', label: 'Colour A', type: 'swatch' },
+      { key: 'colorB', label: 'Colour B', type: 'swatch' },
     ],
     render: checkerDiamonds,
   },
   chevronWeave: {
     label: 'Chevron Weave',
-    defaults: { rowHeight: 0.09, period: 0.14, amplitude: 0.035, strokeWidth: 1.6, color: '#3b1fb0', segSamples: 3 },
+    defaults: { rowHeight: 0.09, period: 0.14, amplitude: 0.035, strokeWidth: 1.6, color: '#4C1392', segSamples: 3 },
     paramsSchema: [
       { key: 'rowHeight', label: 'Row height', type: 'range', min: 0.03, max: 0.2, step: 0.001 },
       { key: 'period', label: 'Period', type: 'range', min: 0.04, max: 0.3, step: 0.001 },
       { key: 'amplitude', label: 'Amplitude', type: 'range', min: 0.005, max: 0.08, step: 0.001 },
       { key: 'strokeWidth', label: 'Stroke width', type: 'range', min: 0.4, max: 5, step: 0.1 },
-      { key: 'color', label: 'Colour', type: 'color' },
+      { key: 'color', label: 'Colour', type: 'swatch' },
     ],
     render: chevronWeave,
+  },
+  petalWeave: {
+    label: 'Petal Weave',
+    defaults: { rowHeight: 0.12, period: 0.16, amplitude: 0.03, scale: 0.9, color: '#3ECCFF' },
+    paramsSchema: [
+      { key: 'rowHeight', label: 'Row height', type: 'range', min: 0.04, max: 0.3, step: 0.001 },
+      { key: 'period', label: 'Period', type: 'range', min: 0.05, max: 0.4, step: 0.001 },
+      { key: 'amplitude', label: 'Amplitude', type: 'range', min: 0, max: 0.1, step: 0.001 },
+      { key: 'scale', label: 'Scale', type: 'range', min: 0.2, max: 2, step: 0.01 },
+      { key: 'color', label: 'Colour', type: 'swatch' },
+    ],
+    render: petalWeave,
   },
 };

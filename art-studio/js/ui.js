@@ -2,16 +2,13 @@ import { PATTERNS } from './patterns.js';
 import { WARP_TYPES } from './warps.js';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, renderSVGInner } from './render.js';
 import { exportSVG, exportPNG } from './export.js';
+import { PALETTE } from './palette.js';
 
 const WARP_LABELS = {
   cylinder: 'Cylinder / Curl',
   fold: 'Fold',
   perspective: 'Perspective Plane',
 };
-
-function getByPath(obj, path) {
-  return path.split('.').reduce((o, k) => (o == null ? o : o[k]), obj);
-}
 
 function setByPath(obj, path, value) {
   const parts = path.split('.');
@@ -21,12 +18,17 @@ function setByPath(obj, path, value) {
 }
 
 function fieldMarkup({ label, dataAttr, key, type, min, max, step, value }) {
-  if (type === 'color') {
+  if (type === 'swatch') {
+    const swatches = PALETTE.map(
+      (c) => `
+        <button type="button" class="swatch-btn${c.hex.toLowerCase() === String(value).toLowerCase() ? ' selected' : ''}"
+          style="background:${c.hex}" ${dataAttr}="${key}" data-hex="${c.hex}" title="${c.name}"></button>`
+    ).join('');
     return `
-      <label class="field field-row">
+      <div class="field">
         <span>${label}</span>
-        <input type="color" ${dataAttr}="${key}" value="${value}" />
-      </label>`;
+        <div class="swatch-grid">${swatches}</div>
+      </div>`;
   }
   if (type === 'checkbox') {
     return `
@@ -62,15 +64,17 @@ export function initUI(studio) {
     const rows = [...studio.sheets]
       .map((s, i) => ({ s, i }))
       .reverse()
-      .map(({ s }) => {
+      .map(({ s, i }) => {
         const selected = s.id === studio.selectedId ? ' selected' : '';
-        const swatch = `linear-gradient(${s.gradient.angle}deg, ${s.gradient.stops[0]}, ${s.gradient.stops[1]})`;
+        const [c1, c2] = s.fill.colors;
+        const swatch = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
+        const linkTag = i === 0 ? 'Ribbon start' : 'Linked';
         return `
         <li class="layer-row${selected}" data-id="${s.id}">
           <span class="layer-swatch" style="background:${swatch}"></span>
           <span class="layer-text">
             <span class="layer-label">${PATTERNS[s.pattern].label}</span>
-            <span class="layer-sub">${WARP_LABELS[s.warpType]}</span>
+            <span class="layer-sub">${WARP_LABELS[s.warpType]} · ${linkTag}</span>
           </span>
           <span class="layer-actions">
             <button data-action="up" title="Bring forward (])">&uarr;</button>
@@ -90,6 +94,9 @@ export function initUI(studio) {
       sheetControls.innerHTML = '';
       return;
     }
+    const idx = studio.sheets.indexOf(sel);
+    const isFirst = idx === 0;
+
     const patternDef = PATTERNS[sel.pattern];
     const patternFields = patternDef.paramsSchema
       .map((f) =>
@@ -106,10 +113,21 @@ export function initUI(studio) {
       )
       .join('');
 
+    const placementFields = isFirst
+      ? `
+        ${fieldMarkup({ label: 'Rotation', dataAttr: 'data-field', key: 'rotation', type: 'range', min: -180, max: 180, step: 1, value: sel.rotation })}
+        ${fieldMarkup({ label: 'Position X', dataAttr: 'data-field', key: 'position.x', type: 'range', min: -200, max: CANVAS_WIDTH + 200, step: 1, value: sel.position.x })}
+        ${fieldMarkup({ label: 'Position Y', dataAttr: 'data-field', key: 'position.y', type: 'range', min: -200, max: CANVAS_HEIGHT + 200, step: 1, value: sel.position.y })}
+      `
+      : `
+        ${fieldMarkup({ label: 'Turn from previous', dataAttr: 'data-field', key: 'turnDelta', type: 'range', min: -150, max: 150, step: 1, value: sel.turnDelta || 0 })}
+      `;
+
     sheetControls.innerHTML = `
       <div class="panel-section">
         <div class="section-head">
           <h2>Sheet</h2>
+          <span class="chain-badge">${isFirst ? 'Ribbon start' : `Linked to segment ${idx}`}</span>
         </div>
         <label class="field">
           <span>Warp</span>
@@ -118,16 +136,13 @@ export function initUI(studio) {
           </select>
         </label>
         ${fieldMarkup({ label: 'Warp amount', dataAttr: 'data-field', key: 'warpAmount', type: 'range', min: -1, max: 1, step: 0.01, value: sel.warpAmount })}
-        ${fieldMarkup({ label: 'Rotation', dataAttr: 'data-field', key: 'rotation', type: 'range', min: -180, max: 180, step: 1, value: sel.rotation })}
+        ${placementFields}
         ${fieldMarkup({ label: 'Scale', dataAttr: 'data-field', key: 'scale', type: 'range', min: 60, max: 800, step: 1, value: sel.scale })}
-        ${fieldMarkup({ label: 'Position X', dataAttr: 'data-field', key: 'position.x', type: 'range', min: -200, max: CANVAS_WIDTH + 200, step: 1, value: sel.position.x })}
-        ${fieldMarkup({ label: 'Position Y', dataAttr: 'data-field', key: 'position.y', type: 'range', min: -200, max: CANVAS_HEIGHT + 200, step: 1, value: sel.position.y })}
       </div>
       <div class="panel-section">
-        <h2>Gradient</h2>
-        ${fieldMarkup({ label: 'Stop 1', dataAttr: 'data-field', key: 'gradient.stops.0', type: 'color', value: sel.gradient.stops[0] })}
-        ${fieldMarkup({ label: 'Stop 2', dataAttr: 'data-field', key: 'gradient.stops.1', type: 'color', value: sel.gradient.stops[1] })}
-        ${fieldMarkup({ label: 'Angle', dataAttr: 'data-field', key: 'gradient.angle', type: 'range', min: 0, max: 360, step: 1, value: sel.gradient.angle })}
+        <h2>Fill</h2>
+        ${fieldMarkup({ label: 'Colour 1', dataAttr: 'data-field', key: 'fill.colors.0', type: 'swatch', value: sel.fill.colors[0] })}
+        ${fieldMarkup({ label: 'Colour 2 (shadow)', dataAttr: 'data-field', key: 'fill.colors.1', type: 'swatch', value: sel.fill.colors[1] })}
       </div>
       <div class="panel-section">
         <div class="section-head">
@@ -146,7 +161,9 @@ export function initUI(studio) {
 
   function controlsSignature() {
     const sel = studio.selected();
-    return sel ? `${sel.id}:${sel.pattern}:${sel.warpType}` : 'none';
+    if (!sel) return 'none';
+    const idx = studio.sheets.indexOf(sel);
+    return `${sel.id}:${sel.pattern}:${sel.warpType}:${idx === 0}`;
   }
 
   function onStudioChange() {
@@ -199,6 +216,19 @@ export function initUI(studio) {
       sel.patternParams[t.dataset.param] = value;
       studio.notify();
     }
+  });
+
+  sheetControls.addEventListener('click', (e) => {
+    const btn = e.target.closest('.swatch-btn');
+    if (!btn) return;
+    const sel = studio.selected();
+    if (!sel) return;
+    const hex = btn.dataset.hex;
+    if (btn.dataset.field) setByPath(sel, btn.dataset.field, hex);
+    else if (btn.dataset.param) sel.patternParams[btn.dataset.param] = hex;
+    studio.notify();
+    renderSheetControls();
+    lastControlsSig = controlsSignature();
   });
 
   // --- Seed + randomise ------------------------------------------------------

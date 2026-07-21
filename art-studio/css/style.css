@@ -356,6 +356,40 @@ body {
   cursor: pointer;
 }
 
+.chain-badge {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.02em;
+}
+
+.swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 5px;
+}
+
+.swatch-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.swatch-btn:hover {
+  transform: scale(1.08);
+}
+
+.swatch-btn.selected {
+  box-shadow: 0 0 0 2px var(--panel-bg), 0 0 0 4px var(--ink);
+}
+
 /* Range sliders */
 input[type="range"] {
   -webkit-appearance: none;
