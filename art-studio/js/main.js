@@ -5,9 +5,9 @@ const canvas = document.getElementById('canvas');
 const sheet = {
   id: 'sheet-1',
   warpType: 'cylinder',
-  warpAmount: 0.55,
-  rotation: 0,
-  scale: 480,
+  warpAmount: 0.62,
+  rotation: -28,
+  scale: 360,
   position: { x: 480, y: 320 },
   pattern: 'crossHalftone',
   patternParams: {

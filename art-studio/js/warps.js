@@ -14,11 +14,12 @@ function persp(X3, Y3, Z3) {
 // amount 0 = flat plane, amount 1 = curled through ~0.8 full turns.
 
 const CYLINDER_TURNS = 0.8;
+const CYLINDER_LENGTH = 2.6; // elongates v so the sheet reads as a ribbon, not a square tube
 
 function cylinderPoint(u, v, amount) {
   const angleSpan = amount * CYLINDER_TURNS * Math.PI * 2;
   const cu = u - 0.5;
-  const cv = v - 0.5;
+  const cv = (v - 0.5) * CYLINDER_LENGTH;
   let X3, Z3;
   if (Math.abs(angleSpan) < 1e-4) {
     X3 = cu;
@@ -60,13 +61,15 @@ function buildFoldTable(amount) {
   return { n, w, hx, hz, dirs, offset };
 }
 
+const FOLD_LENGTH = 2.2;
+
 function foldPoint(table, u, v) {
   const seg = Math.min(Math.max(Math.floor(u * table.n), 0), table.n - 1);
   const t = u * table.n - seg;
   const [dX, dZ] = table.dirs[seg];
   const X3 = table.hx[seg] + t * table.w * dX - table.offset;
   const Z3 = table.hz[seg] + t * table.w * dZ;
-  return persp(X3, v - 0.5, Z3);
+  return persp(X3, (v - 0.5) * FOLD_LENGTH, Z3);
 }
 
 // --- Perspective plane ---------------------------------------------------
@@ -74,11 +77,12 @@ function foldPoint(table, u, v) {
 // wall or floor receding into the distance.
 
 const PLANE_TILT_MAX = 1.361; // ~78deg
+const PLANE_LENGTH = 2.0;
 
 function perspectivePlanePoint(u, v, amount) {
   const tilt = amount * PLANE_TILT_MAX;
   const X3 = u - 0.5;
-  const cv = v - 0.5;
+  const cv = (v - 0.5) * PLANE_LENGTH;
   const Y3 = cv * Math.cos(tilt);
   const Z3 = cv * Math.sin(tilt);
   return persp(X3, Y3, Z3);
