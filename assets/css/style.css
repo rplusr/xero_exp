@@ -856,6 +856,74 @@ a { color: inherit; }
   margin: 0;
 }
 
+/* the values-section's own intro is no longer the first thing on the
+   page once the attributes section sits above it, so it doesn't need
+   to clear the fixed header a second time */
+.values-page > .values-intro {
+  padding-top: var(--space-6);
+}
+
+.attributes-section {
+  padding-bottom: var(--space-6);
+}
+
+.attributes-list-wrap {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.attributes-list {
+  list-style: none;
+  width: 50%;
+  margin: 0;
+  padding: var(--space-6) var(--space-6) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.attribute-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 600ms var(--ease), transform 600ms var(--ease);
+}
+
+.attribute-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.attribute-tick {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-top: 4px;
+  color: var(--accent);
+}
+
+.attribute-tick svg circle,
+.attribute-tick svg path {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transition: stroke-dashoffset 700ms var(--ease) 150ms;
+}
+
+.attribute-item.is-visible .attribute-tick svg circle,
+.attribute-item.is-visible .attribute-tick svg path {
+  stroke-dashoffset: 0;
+}
+
+.attribute-text {
+  font-size: clamp(18px, 2.1vw, 26px);
+  line-height: 1.4;
+  font-weight: var(--weight-medium);
+  color: var(--nav-text);
+}
+
 .values-stack-wrap {
   position: relative;
   width: 100%;
@@ -1034,6 +1102,13 @@ a { color: inherit; }
   .values-zones { grid-template-columns: repeat(2, 1fr); }
   .values-zone { width: min(152px, 100%); }
   .values-card { width: 152px; }
+  .attributes-list-wrap { justify-content: flex-start; }
+  .attributes-list {
+    width: 100%;
+    padding: var(--space-4) var(--space-6) 0;
+    gap: var(--space-5);
+  }
+  .attribute-text { font-size: clamp(17px, 4.5vw, 20px); }
 }
 
 /* ---------------------------------------------------------------- */
@@ -1058,5 +1133,15 @@ a { color: inherit; }
   }
   .values-card-tilt, .values-card-image {
     transition: none;
+  }
+  .attribute-item {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+  .attribute-tick svg circle,
+  .attribute-tick svg path {
+    transition: none;
+    stroke-dashoffset: 0;
   }
 }
