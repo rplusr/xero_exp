@@ -819,6 +819,150 @@ a { color: inherit; }
 }
 
 /* ---------------------------------------------------------------- */
+/* Brand Values — scroll-scrub card stack                             */
+/* ---------------------------------------------------------------- */
+
+.values-page {
+  background: var(--paper);
+  padding-bottom: var(--space-6);
+}
+
+.values-intro {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: calc(var(--nav-margin) + var(--nav-height) + var(--space-6)) var(--nav-margin) 0;
+}
+
+.values-title {
+  font-size: var(--fs-title);
+  font-weight: var(--weight-bold);
+  color: var(--nav-text);
+  margin: 0 0 var(--space-3);
+}
+
+.values-body {
+  max-width: 560px;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.values-stack-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.values-stack-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.values-stack-spacer {
+  height: 150vh;
+}
+
+.values-stack {
+  position: absolute;
+  inset: 0;
+}
+
+.values-zones {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-content: center;
+  gap: var(--space-4);
+  padding: var(--space-6) calc(var(--nav-margin) + var(--space-4));
+  pointer-events: none;
+}
+
+.values-zone {
+  width: min(220px, 100%);
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+}
+
+.values-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 220px;
+  aspect-ratio: 3 / 4;
+  cursor: pointer;
+}
+
+.values-card-tilt {
+  width: 100%;
+  height: 100%;
+}
+
+.values-card-tilt:not(.is-tilting) {
+  transition: transform 320ms var(--ease);
+}
+
+.values-card-flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 500ms var(--ease);
+}
+
+.values-card-flip.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* the face itself only carries the 3D-facing transform + backface
+   culling — border-radius/overflow/box-shadow live on the inner div
+   instead, since combining those with backface-visibility on the same
+   element forces Chromium to flatten/layerize it, breaking the flip
+   (both faces render hidden instead of the rotated one showing) */
+.values-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.values-card-back {
+  transform: rotateY(180deg);
+}
+
+.values-card-face-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: var(--header-shadow);
+}
+
+.values-card-front .values-card-face-inner {
+  background: var(--paper);
+}
+
+.values-card-back .values-card-face-inner {
+  background: var(--nav-text);
+  color: var(--paper);
+  font-size: var(--fs-mega);
+  font-weight: var(--weight-bold);
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.values-card-image {
+  width: 55%;
+  height: auto;
+  transition: transform 320ms var(--ease);
+}
+
+/* ---------------------------------------------------------------- */
 /* Responsive                                                         */
 /* ---------------------------------------------------------------- */
 
@@ -827,6 +971,8 @@ a { color: inherit; }
   .menu-toggle { display: inline-flex; }
   .mega-panel { display: none; }
   .brand-subtitle { display: none; }
+  .values-zones { grid-template-columns: repeat(2, 1fr); }
+  .values-card { width: 140px; }
 }
 
 /* ---------------------------------------------------------------- */
@@ -848,5 +994,8 @@ a { color: inherit; }
   .login-submit.is-success .login-submit-check {
     animation: none;
     transform: translate(-50%, -50%) scale(1);
+  }
+  .values-card-tilt, .values-card-image {
+    transition: none;
   }
 }
