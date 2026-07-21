@@ -55,10 +55,30 @@
   var PILE_JITTER_X = 30;
   var PILE_JITTER_Y = 20;
   var PILE_ANGLE_MAX = 16;
-  var TILT_MAX_DEG = 14;
-  var PARALLAX_MAX_PX = 12;
+  var TILT_MAX_DEG = 16;
+  var TILT_LIFT_PX = 26;
+  var PARALLAX_MAX_PX = 14;
+  var SPRING_FACTOR = 0.16;
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function createTiltState(tiltEl, imgEl, glareEl) {
+    return {
+      tiltEl: tiltEl,
+      imgEl: imgEl,
+      glareEl: glareEl,
+      targetRotX: 0, curRotX: 0,
+      targetRotY: 0, curRotY: 0,
+      targetScale: 1, curScale: 1,
+      targetLift: 0, curLift: 0,
+      targetImgX: 0, curImgX: 0,
+      targetImgY: 0, curImgY: 0,
+      targetImgScale: 1, curImgScale: 1,
+      targetGlareX: 50, curGlareX: 50,
+      targetGlareY: 50, curGlareY: 50,
+      targetGlareOpacity: 0, curGlareOpacity: 0
+    };
+  }
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -74,12 +94,14 @@
   var zones = [];
   var pileState = [];
   var deltaState = [];
+  var tiltStates = [];
 
   function buildCards() {
     stack.innerHTML = "";
     zonesEl.innerHTML = "";
     cards = [];
     zones = [];
+    tiltStates = [];
 
     for (var i = 0; i < CARD_COUNT; i++) {
       var value = VALUES[i];
@@ -130,9 +152,13 @@
       backInner.appendChild(reason);
       back.appendChild(backInner);
 
+      var glare = document.createElement("div");
+      glare.className = "values-card-glare";
+
       flip.appendChild(front);
       flip.appendChild(back);
       tilt.appendChild(flip);
+      tilt.appendChild(glare);
       card.appendChild(tilt);
       stack.appendChild(card);
       cards.push(card);
@@ -142,34 +168,72 @@
       zonesEl.appendChild(zone);
       zones.push(zone);
 
-      (function (cardEl, tiltEl, flipEl, imgEl) {
+      var state = createTiltState(tilt, img, glare);
+      tiltStates.push(state);
+
+      (function (cardEl, flipEl, tiltState) {
         cardEl.addEventListener("click", function () {
           flipEl.classList.toggle("is-flipped");
         });
 
         cardEl.addEventListener("mouseenter", function () {
-          tiltEl.classList.add("is-tilting");
+          tiltState.targetScale = 1.05;
+          tiltState.targetLift = TILT_LIFT_PX;
+          tiltState.targetImgScale = 1.08;
+          tiltState.targetGlareOpacity = 1;
         });
 
         cardEl.addEventListener("mousemove", function (e) {
           var rect = cardEl.getBoundingClientRect();
           var relX = (e.clientX - rect.left) / rect.width - 0.5;
           var relY = (e.clientY - rect.top) / rect.height - 0.5;
-          tiltEl.style.transform =
-            "perspective(700px) rotateY(" + (relX * TILT_MAX_DEG).toFixed(2) + "deg) " +
-            "rotateX(" + (-relY * TILT_MAX_DEG).toFixed(2) + "deg) scale(1.04)";
-          imgEl.style.transform =
-            "translate(" + (-relX * PARALLAX_MAX_PX).toFixed(1) + "px, " +
-            (-relY * PARALLAX_MAX_PX).toFixed(1) + "px) scale(1.08)";
+          tiltState.targetRotY = relX * TILT_MAX_DEG;
+          tiltState.targetRotX = -relY * TILT_MAX_DEG;
+          tiltState.targetImgX = -relX * PARALLAX_MAX_PX;
+          tiltState.targetImgY = -relY * PARALLAX_MAX_PX;
+          tiltState.targetGlareX = (relX + 0.5) * 100;
+          tiltState.targetGlareY = (relY + 0.5) * 100;
         });
 
         cardEl.addEventListener("mouseleave", function () {
-          tiltEl.classList.remove("is-tilting");
-          tiltEl.style.transform = "";
-          imgEl.style.transform = "";
+          tiltState.targetRotX = 0;
+          tiltState.targetRotY = 0;
+          tiltState.targetScale = 1;
+          tiltState.targetLift = 0;
+          tiltState.targetImgX = 0;
+          tiltState.targetImgY = 0;
+          tiltState.targetImgScale = 1;
+          tiltState.targetGlareOpacity = 0;
         });
-      })(card, tilt, flip, img);
+      })(card, flip, state);
     }
+  }
+
+  function stepTiltSpring() {
+    for (var i = 0; i < tiltStates.length; i++) {
+      var s = tiltStates[i];
+      s.curRotX += (s.targetRotX - s.curRotX) * SPRING_FACTOR;
+      s.curRotY += (s.targetRotY - s.curRotY) * SPRING_FACTOR;
+      s.curScale += (s.targetScale - s.curScale) * SPRING_FACTOR;
+      s.curLift += (s.targetLift - s.curLift) * SPRING_FACTOR;
+      s.curImgX += (s.targetImgX - s.curImgX) * SPRING_FACTOR;
+      s.curImgY += (s.targetImgY - s.curImgY) * SPRING_FACTOR;
+      s.curImgScale += (s.targetImgScale - s.curImgScale) * SPRING_FACTOR;
+      s.curGlareX += (s.targetGlareX - s.curGlareX) * SPRING_FACTOR;
+      s.curGlareY += (s.targetGlareY - s.curGlareY) * SPRING_FACTOR;
+      s.curGlareOpacity += (s.targetGlareOpacity - s.curGlareOpacity) * SPRING_FACTOR;
+
+      s.tiltEl.style.transform =
+        "perspective(700px) translateZ(" + s.curLift.toFixed(2) + "px) " +
+        "rotateY(" + s.curRotY.toFixed(2) + "deg) rotateX(" + s.curRotX.toFixed(2) + "deg) " +
+        "scale(" + s.curScale.toFixed(3) + ")";
+      s.imgEl.style.transform =
+        "translate(" + s.curImgX.toFixed(1) + "px, " + s.curImgY.toFixed(1) + "px) scale(" + s.curImgScale.toFixed(3) + ")";
+      s.glareEl.style.setProperty("--glare-x", s.curGlareX.toFixed(1) + "%");
+      s.glareEl.style.setProperty("--glare-y", s.curGlareY.toFixed(1) + "%");
+      s.glareEl.style.opacity = s.curGlareOpacity.toFixed(3);
+    }
+    requestAnimationFrame(stepTiltSpring);
   }
 
   function randomizePile() {
@@ -239,4 +303,5 @@
 
   buildCards();
   init();
+  if (!reduceMotion) requestAnimationFrame(stepTiltSpring);
 })();
