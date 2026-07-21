@@ -888,14 +888,14 @@ a { color: inherit; }
   padding: var(--space-5);
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  background: #FFFFFF;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFFFF 100%);
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 600ms var(--ease), transform 600ms var(--ease), background-color 400ms var(--ease);
+  transition: opacity 600ms var(--ease), transform 600ms var(--ease), background 400ms var(--ease);
 }
 
 .attribute-item:hover {
-  background: #F2F1EE;
+  background: linear-gradient(135deg, #F2F1EE 0%, #FFFFFF 100%);
 }
 
 .attribute-item:nth-child(3n) {
