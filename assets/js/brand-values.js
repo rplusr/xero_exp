@@ -24,10 +24,19 @@
 
   function iconSrc(name) { return ICON_BASE + name; }
 
-  var CARD_COUNT = 8;
+  // placeholder value names/descriptors — swap for the real four
+  var VALUES = [
+    { name: "Human", descriptor: "Warm, personal, and real in every interaction." },
+    { name: "Beautiful", descriptor: "Considered design in every last detail." },
+    { name: "Straightforward", descriptor: "Clear and simple, no unnecessary jargon." },
+    { name: "Smart", descriptor: "Thoughtful solutions that just work." }
+  ];
+
+  var CARD_COUNT = VALUES.length;
   var PILE_JITTER_X = 30;
   var PILE_JITTER_Y = 20;
   var PILE_ANGLE_MAX = 16;
+  var PILE_LIFT_FRACTION = 0.18;
   var TILT_MAX_DEG = 14;
   var PARALLAX_MAX_PX = 12;
 
@@ -79,9 +88,14 @@
       back.className = "values-card-face values-card-back";
       var backInner = document.createElement("div");
       backInner.className = "values-card-face-inner";
-      var backLabel = document.createElement("span");
-      backLabel.textContent = "Hello World";
-      backInner.appendChild(backLabel);
+      var valueName = document.createElement("span");
+      valueName.className = "values-card-value-name";
+      valueName.textContent = VALUES[i].name;
+      var valueDescriptor = document.createElement("span");
+      valueDescriptor.className = "values-card-value-descriptor";
+      valueDescriptor.textContent = VALUES[i].descriptor;
+      backInner.appendChild(valueName);
+      backInner.appendChild(valueDescriptor);
       back.appendChild(backInner);
 
       flip.appendChild(front);
@@ -127,10 +141,14 @@
   }
 
   function randomizePile() {
+    // lift the pile up from dead-center toward where the fanned-out grid
+    // actually sits (top-anchored), so it starts close to the intro text
+    // instead of leaving a tall empty gap above a vertically-centered pile
+    var baseY = -(stack.offsetHeight * PILE_LIFT_FRACTION);
     pileState = cards.map(function () {
       return {
         x: (Math.random() - 0.5) * PILE_JITTER_X,
-        y: (Math.random() - 0.5) * PILE_JITTER_Y,
+        y: baseY + (Math.random() - 0.5) * PILE_JITTER_Y,
         rot: (Math.random() - 0.5) * PILE_ANGLE_MAX * 2
       };
     });

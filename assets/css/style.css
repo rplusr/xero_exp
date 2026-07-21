@@ -830,11 +830,11 @@ a { color: inherit; }
 .values-intro {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: calc(var(--nav-margin) + var(--nav-height) + var(--space-6)) var(--nav-margin) 0;
+  padding: calc(var(--nav-margin) + var(--nav-height) + var(--space-4)) var(--space-6) 0;
 }
 
 .values-title {
-  font-size: var(--fs-title);
+  font-size: calc(var(--fs-title) * 0.75);
   font-weight: var(--weight-bold);
   color: var(--nav-text);
   margin: 0 0 var(--space-3);
@@ -842,7 +842,7 @@ a { color: inherit; }
 
 .values-body {
   max-width: 560px;
-  font-size: var(--fs-body);
+  font-size: calc(var(--fs-body) * 0.75);
   line-height: 1.6;
   color: var(--ink-muted);
   margin: 0;
@@ -857,12 +857,12 @@ a { color: inherit; }
   position: sticky;
   top: 0;
   width: 100%;
-  height: 100vh;
+  height: 70vh;
   overflow: hidden;
 }
 
 .values-stack-spacer {
-  height: 150vh;
+  height: 100vh;
 }
 
 .values-stack {
@@ -875,9 +875,9 @@ a { color: inherit; }
   inset: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  align-content: center;
+  align-content: start;
   gap: var(--space-4);
-  padding: var(--space-6) calc(var(--nav-margin) + var(--space-4));
+  padding: var(--space-5) var(--space-6) var(--space-4);
   pointer-events: none;
 }
 
@@ -950,10 +950,22 @@ a { color: inherit; }
 .values-card-back .values-card-face-inner {
   background: var(--nav-text);
   color: var(--paper);
-  font-size: var(--fs-mega);
-  font-weight: var(--weight-bold);
+  flex-direction: column;
   text-align: center;
   padding: var(--space-4);
+}
+
+.values-card-value-name {
+  font-size: calc(var(--fs-mega) * 0.5);
+  font-weight: var(--weight-bold);
+  margin: 0 0 var(--space-2);
+}
+
+.values-card-value-descriptor {
+  font-size: var(--fs-label);
+  font-weight: var(--weight-text);
+  line-height: 1.4;
+  opacity: 0.8;
 }
 
 .values-card-image {
