@@ -196,10 +196,64 @@
 
   var sinkPoint = { x: 0, y: 0 };
   var currentVortexProgress = 0;
+  var warpPinchEl = null;
+  var warpMeltEl = null;
+
+  function ensureVortexWarpFilter() {
+    if (document.getElementById("values-vortex-warp")) {
+      warpPinchEl = document.getElementById("values-warp-pinch");
+      warpMeltEl = document.getElementById("values-warp-melt");
+      return;
+    }
+
+    var size = 128;
+    var mapCanvas = document.createElement("canvas");
+    mapCanvas.width = size;
+    mapCanvas.height = size;
+    var mapCtx = mapCanvas.getContext("2d");
+    var imageData = mapCtx.createImageData(size, size);
+    var data = imageData.data;
+    var center = size / 2;
+    for (var y = 0; y < size; y++) {
+      for (var x = 0; x < size; x++) {
+        var dx = (center - x) / center;
+        var dy = (center - y) / center;
+        var idx = (y * size + x) * 4;
+        data[idx] = Math.round((dx * 0.5 + 0.5) * 255);
+        data[idx + 1] = Math.round((dy * 0.5 + 0.5) * 255);
+        data[idx + 2] = 128;
+        data[idx + 3] = 255;
+      }
+    }
+    mapCtx.putImageData(imageData, 0, 0);
+    var sinkMapUri = mapCanvas.toDataURL();
+
+    var svgNS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("width", "0");
+    svg.setAttribute("height", "0");
+    svg.style.position = "absolute";
+    svg.style.overflow = "hidden";
+    svg.innerHTML =
+      '<defs><filter id="values-vortex-warp" x="-75%" y="-75%" width="250%" height="250%" color-interpolation-filters="sRGB">' +
+      '<feImage href="' + sinkMapUri + '" x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="sinkMap"/>' +
+      '<feDisplacementMap id="values-warp-pinch" in="SourceGraphic" in2="sinkMap" xChannelSelector="R" yChannelSelector="G" scale="0" result="pinched"/>' +
+      '<feTurbulence type="fractalNoise" baseFrequency="0.06 0.1" numOctaves="2" seed="6" result="warpNoise"/>' +
+      '<feDisplacementMap id="values-warp-melt" in="pinched" in2="warpNoise" xChannelSelector="R" yChannelSelector="G" scale="0"/>' +
+      "</filter></defs>";
+    document.body.appendChild(svg);
+
+    warpPinchEl = document.getElementById("values-warp-pinch");
+    warpMeltEl = document.getElementById("values-warp-melt");
+  }
 
   function applyProgress(progress) {
     var cardProgress = reduceMotion ? GRID_PHASE_END : progress;
     var t = Math.min(1, cardProgress / GRID_PHASE_END);
+    var vp = cardProgress > GRID_PHASE_END
+      ? clamp01((cardProgress - GRID_PHASE_END) / (1 - GRID_PHASE_END))
+      : 0;
+    var ve = vp * vp;
 
     for (var i = 0; i < cards.length; i++) {
       var p = pileState[i];
@@ -213,9 +267,7 @@
       var opacity = 1;
       var blur = 0;
 
-      if (cardProgress > GRID_PHASE_END) {
-        var vp = clamp01((cardProgress - GRID_PHASE_END) / (1 - GRID_PHASE_END));
-        var ve = vp * vp;
+      if (vp > 0) {
         var finalGridX = p.x + d.dx;
         var finalGridY = p.y + d.dy;
         var toSinkX = sinkPoint.x - finalGridX;
@@ -230,24 +282,33 @@
         rot = ve * spins * 360;
         scale = 1 - ve * 0.94;
         opacity = 1 - Math.pow(ve, 2.4);
-        blur = ve * 9;
+        blur = Math.pow(ve, 1.6) * 9;
       }
+
+      var filterParts = [];
+      if (vp > 0.001) filterParts.push("url(#values-vortex-warp)");
+      if (blur > 0.4) filterParts.push("blur(" + blur.toFixed(1) + "px)");
 
       cards[i].style.transform =
         "translate(calc(-50% + " + x.toFixed(1) + "px), calc(-50% + " + y.toFixed(1) + "px)) rotate(" + rot.toFixed(2) + "deg) scale(" + scale.toFixed(3) + ")";
       cards[i].style.zIndex = String(cards.length - i);
       cards[i].style.opacity = opacity.toFixed(3);
-      cards[i].style.filter = blur > 0.4 ? "blur(" + blur.toFixed(1) + "px)" : "";
+      cards[i].style.filter = filterParts.join(" ");
       cards[i].style.pointerEvents = opacity < 0.15 ? "none" : "";
     }
 
-    var goxeroProgress = reduceMotion ? 1 : clamp01((progress - GRID_PHASE_END) / (1 - GRID_PHASE_END));
-    var goxeroScale = 0.55 + 0.45 * easeOutBack(goxeroProgress);
-    var goxeroOpacity = Math.min(1, goxeroProgress * 1.3);
+    if (warpPinchEl && warpMeltEl) {
+      warpPinchEl.setAttribute("scale", (Math.pow(vp, 0.7) * 150).toFixed(1));
+      warpMeltEl.setAttribute("scale", (Math.pow(vp, 0.7) * 40).toFixed(1));
+    }
+
+    var revealVp = reduceMotion ? 1 : vp;
+    var goxeroScale = 0.55 + 0.45 * easeOutBack(revealVp);
+    var goxeroOpacity = Math.min(1, revealVp * 1.3);
     goxeroEl.style.transform = "translate(-50%, -50%) scale(" + goxeroScale.toFixed(3) + ")";
     goxeroEl.style.opacity = goxeroOpacity.toFixed(3);
 
-    currentVortexProgress = goxeroProgress;
+    currentVortexProgress = vp;
   }
 
   function measure() {
@@ -374,6 +435,7 @@
   var resizeTimer;
 
   function init() {
+    ensureVortexWarpFilter();
     resizeCanvas();
     randomizePile();
     measure();
