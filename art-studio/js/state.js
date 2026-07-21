@@ -8,26 +8,19 @@ function nextId() {
   return `zone-${idCounter++}`;
 }
 
+// A plain Lissajous curve (one sine per axis). Low integer frequencies —
+// 1:1 gives a single loop, 1:2/2:3 give a figure-eight or trefoil-ish
+// sweep — read as one ribbon crossing the canvas rather than a tangle.
 function randomPathParams(rng) {
   return {
-    cx: CANVAS_WIDTH / 2 + range(rng, -50, 50),
-    cy: CANVAS_HEIGHT / 2 + range(rng, -30, 30),
-    ax1: range(rng, 260, 360),
-    fx1: pick(rng, [1, 2, 2, 3]),
-    px1: range(rng, 0, Math.PI * 2),
-    // Secondary harmonics add wobble; kept modest relative to the primary
-    // amplitude and frequency, since a high-frequency wobble with too much
-    // amplitude creates near-cusp turns tighter than any sensible ribbon
-    // width can follow without pinching down to a sliver.
-    ax2: range(rng, 35, 80),
-    fx2: pick(rng, [2, 2, 3]),
-    px2: range(rng, 0, Math.PI * 2),
-    ay1: range(rng, 150, 230),
-    fy1: pick(rng, [1, 1, 2]),
-    py1: range(rng, 0, Math.PI * 2),
-    ay2: range(rng, 30, 70),
-    fy2: pick(rng, [2, 2, 3]),
-    py2: range(rng, 0, Math.PI * 2),
+    cx: CANVAS_WIDTH / 2 + range(rng, -40, 40),
+    cy: CANVAS_HEIGHT / 2 + range(rng, -25, 25),
+    ax: range(rng, 280, 380),
+    fx: pick(rng, [1, 1, 2, 2, 3]),
+    px: range(rng, 0, Math.PI * 2),
+    ay: range(rng, 170, 250),
+    fy: pick(rng, [1, 1, 2, 2, 3]),
+    py: range(rng, 0, Math.PI * 2),
   };
 }
 
@@ -67,9 +60,7 @@ export class Studio {
     this.seed = '1';
     const rng = makeRng(this.seed);
     this.path = randomPathParams(rng);
-    this.baseWidth = 95;
-    this.pinchWidth = 14;
-    this.pinchRadius = 0.045;
+    this.baseWidth = 100;
     this.zones = [];
     this.selectedId = null;
     this._listeners = new Set();
@@ -87,8 +78,6 @@ export class Studio {
     return {
       path: this.path,
       baseWidth: this.baseWidth,
-      pinchWidth: this.pinchWidth,
-      pinchRadius: this.pinchRadius,
       zones: this.zones,
     };
   }
@@ -149,10 +138,8 @@ export class Studio {
     this.seed = String(seed);
     const rng = makeRng(this.seed);
     this.path = randomPathParams(rng);
-    this.baseWidth = range(rng, 70, 105);
-    this.pinchWidth = this.baseWidth * range(rng, 0.08, 0.18);
-    this.pinchRadius = range(rng, 0.03, 0.06);
-    const count = 3 + Math.floor(rng() * 3);
+    this.baseWidth = range(rng, 80, 120);
+    const count = 2 + Math.floor(rng() * 3);
     this.zones = [];
     for (let i = 0; i < count; i++) this.zones.push(randomZone(rng));
     this.selectedId = this.zones[this.zones.length - 1].id;

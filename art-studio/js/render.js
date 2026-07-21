@@ -41,12 +41,6 @@ function markupForMark(mark) {
   return '';
 }
 
-function twistPositions(zoneCount) {
-  const twists = [];
-  for (let i = 1; i < zoneCount; i++) twists.push(i / zoneCount);
-  return twists;
-}
-
 function buildZoneMarkup(ribbon, zone, pathFn, widthFn, s0, s1) {
   const project = makeZoneProjector(pathFn, widthFn, s0, s1);
   const boundaryD = boundaryPath(project);
@@ -80,7 +74,7 @@ export function renderSVGInner(ribbon) {
   }
 
   const pathFn = makePathFn(ribbon.path);
-  const widthFn = makeWidthFn(pathFn, twistPositions(n), ribbon.baseWidth, ribbon.pinchWidth, ribbon.pinchRadius);
+  const widthFn = makeWidthFn(pathFn, ribbon.baseWidth);
 
   const built = ribbon.zones.map((zone, i) => buildZoneMarkup(ribbon, zone, pathFn, widthFn, i / n, (i + 1) / n));
 

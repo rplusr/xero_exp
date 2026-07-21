@@ -1,22 +1,16 @@
-// A ribbon is a single smooth path (a harmonograph-style curve — two
-// summed sine waves per axis) with a width that pinches down to near-zero
-// at each "twist" — the point where one colour/texture zone hands off to
-// the next. The pinch reads as the ribbon turning edge-on, like a real
-// strip of paper twisting to show its other face, so the colour change
-// never looks like a hard seam.
+// A ribbon is a single smooth path — a Lissajous curve (one sine wave per
+// axis) — with a width that eases down gently at each zone boundary, so a
+// colour/texture change reads as the ribbon turning rather than a seam.
+// Low integer frequencies keep the curve reading as one ribbon sweeping the
+// canvas, not a tangle of small loops.
 
 export function makePathFn(p) {
   return function pathPoint(s) {
     const t = s * Math.PI * 2;
-    const x = p.cx + p.ax1 * Math.sin(p.fx1 * t + p.px1) + p.ax2 * Math.sin(p.fx2 * t + p.px2);
-    const y = p.cy + p.ay1 * Math.sin(p.fy1 * t + p.py1) + p.ay2 * Math.sin(p.fy2 * t + p.py2);
+    const x = p.cx + p.ax * Math.sin(p.fx * t + p.px);
+    const y = p.cy + p.ay * Math.sin(p.fy * t + p.py);
     return { x, y };
   };
-}
-
-function smoothstep(t) {
-  const c = Math.max(0, Math.min(1, t));
-  return c * c * (3 - 2 * c);
 }
 
 function normalize(x, y) {
@@ -38,9 +32,11 @@ function arcLength(pathFn, s0, s1, samples = 60) {
 // Radius of curvature at s, via the angle turned between two short chords
 // either side of s. Where the path bends sharply this gets small — if the
 // ribbon's half-width exceeds it, the two edges of the strip cross over
-// each other and the ribbon folds on itself.
+// each other and the ribbon folds on itself. A plain Lissajous curve turns
+// gradually everywhere except right at the tips of its loops, so a simple
+// instantaneous check (no pre-scan/smoothing pass) is enough here.
 function curvatureRadius(pathFn, s) {
-  const eps = 0.002;
+  const eps = 0.003;
   const sm = Math.max(0, s - eps);
   const sp = Math.min(1, s + eps);
   const a = pathFn(sm);
@@ -56,52 +52,13 @@ function curvatureRadius(pathFn, s) {
   return (d1 + d2) / Math.abs(dAngle);
 }
 
-// Builds the ribbon's width-at-s function, combining two effects:
-//  - twist pinches, narrowing smoothly toward each zone boundary
-//  - a curvature safety limit, so the ribbon narrows wherever the path
-//    turns tightly enough that a full-width strip would fold on itself
-// The curvature limit is pre-scanned across the whole path once, then
-// smoothed with a sliding-window minimum sized to the ribbon's own width —
-// otherwise a single sharp wiggle in the curve narrows just that one point
-// and springs back over a couple of pixels, which reads as a torn flap
-// rather than a graceful taper into the tight turn.
-export function makeWidthFn(pathFn, twistPositions, baseWidth, pinchWidth, pinchRadius) {
-  const SAMPLES = 500;
-  const raw = new Array(SAMPLES + 1);
-  for (let i = 0; i <= SAMPLES; i++) {
-    const R = curvatureRadius(pathFn, i / SAMPLES);
-    raw[i] = Math.max(Math.min(baseWidth, R * 1.5), 6);
-  }
-  const totalLen = arcLength(pathFn, 0, 1, SAMPLES);
-  const lenPerSample = totalLen / SAMPLES || 1;
-  const windowSamples = Math.max(1, Math.round((baseWidth * 1.3) / lenPerSample));
-  const smoothed = new Array(SAMPLES + 1);
-  for (let i = 0; i <= SAMPLES; i++) {
-    let m = raw[i];
-    for (let k = 1; k <= windowSamples; k++) {
-      if (i - k >= 0) m = Math.min(m, raw[i - k]);
-      if (i + k <= SAMPLES) m = Math.min(m, raw[i + k]);
-    }
-    smoothed[i] = m;
-  }
-
-  function curvatureSafeWidth(s) {
-    const f = Math.max(0, Math.min(1, s)) * SAMPLES;
-    const i0 = Math.floor(f);
-    const i1 = Math.min(SAMPLES, i0 + 1);
-    const t = f - i0;
-    return smoothed[i0] * (1 - t) + smoothed[i1] * t;
-  }
-
+// Width-at-s: a constant width, easing down only where the curve turns
+// tightly enough that a full-width strip would fold on itself. Zones hand
+// off colour and texture at a clean cut with no narrowing, so the ribbon
+// reads as one continuous strip rather than a chain of pinched links.
+export function makeWidthFn(pathFn, baseWidth) {
   return function widthAt(s) {
-    let minDist = Infinity;
-    for (const tp of twistPositions) {
-      const d = Math.abs(s - tp);
-      if (d < minDist) minDist = d;
-    }
-    const ease = smoothstep(minDist / pinchRadius);
-    const twistWidth = pinchWidth + (baseWidth - pinchWidth) * ease;
-    return Math.min(twistWidth, curvatureSafeWidth(s));
+    return Math.max(Math.min(baseWidth, curvatureRadius(pathFn, s) * 1.6), 6);
   };
 }
 
@@ -153,7 +110,7 @@ export function makeIsotropicProjector(project) {
   return iso;
 }
 
-export function boundaryPath(project, samplesPerEdge = 160) {
+export function boundaryPath(project, samplesPerEdge = 96) {
   const n = samplesPerEdge;
   const pts = [];
   for (let i = 0; i <= n; i++) pts.push(project(i / n, 0));

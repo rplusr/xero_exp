@@ -38,18 +38,14 @@ function fieldMarkup({ label, dataAttr, key, type, min, max, step, value }) {
 }
 
 const RIBBON_FIELDS = [
-  { label: 'Loop width X', key: 'path.ax1', min: 150, max: 420, step: 1 },
-  { label: 'Loop width Y', key: 'path.ay1', min: 100, max: 280, step: 1 },
-  { label: 'Wobble', key: 'wobble', min: 20, max: 90, step: 1 },
-  { label: 'Frequency X', key: 'path.fx1', min: 1, max: 4, step: 1 },
-  { label: 'Frequency Y', key: 'path.fy1', min: 1, max: 4, step: 1 },
-  { label: 'Ribbon width', key: 'baseWidth', min: 30, max: 180, step: 1 },
-  { label: 'Pinch width', key: 'pinchWidth', min: 2, max: 70, step: 1 },
-  { label: 'Pinch tightness', key: 'pinchRadius', min: 0.01, max: 0.12, step: 0.005 },
+  { label: 'Loop width X', key: 'path.ax', min: 150, max: 420, step: 1 },
+  { label: 'Loop width Y', key: 'path.ay', min: 100, max: 280, step: 1 },
+  { label: 'Frequency X', key: 'path.fx', min: 1, max: 3, step: 1 },
+  { label: 'Frequency Y', key: 'path.fy', min: 1, max: 3, step: 1 },
+  { label: 'Ribbon width', key: 'baseWidth', min: 40, max: 180, step: 1 },
 ];
 
 function readRibbonFieldValue(studio, key) {
-  if (key === 'wobble') return studio.path.ax2;
   if (key.startsWith('path.')) return studio.path[key.slice(5)];
   return studio[key];
 }
@@ -175,11 +171,7 @@ export function initUI(studio) {
     if (!t.dataset.ribbon) return;
     const value = parseFloat(t.value);
     const key = t.dataset.ribbon;
-    if (key === 'wobble') {
-      studio.path.ax2 = value;
-      studio.path.ay2 = value;
-      studio.notify();
-    } else if (key.startsWith('path.')) {
+    if (key.startsWith('path.')) {
       studio.path[key.slice(5)] = value;
       studio.notify();
     } else {
@@ -252,7 +244,12 @@ export function initUI(studio) {
   randomiseBtn.addEventListener('click', randomiseWithNewSeed);
 
   exportSvgBtn.addEventListener('click', () => {
-    exportSVG(studio.ribbon(), `ribbon-${studio.seed}.svg`);
+    try {
+      exportSVG(studio.ribbon(), `ribbon-${studio.seed}.svg`);
+    } catch (err) {
+      console.error('SVG export failed', err);
+      window.alert('SVG export failed: ' + err.message);
+    }
   });
   exportPngBtn.addEventListener('click', async () => {
     exportPngBtn.disabled = true;
@@ -261,6 +258,7 @@ export function initUI(studio) {
       await exportPNG(studio.ribbon(), { scale: 3, filename: `ribbon-${studio.seed}.png` });
     } catch (err) {
       console.error('PNG export failed', err);
+      window.alert('PNG export failed: ' + err.message);
     } finally {
       exportPngBtn.disabled = false;
       exportPngBtn.textContent = 'Export PNG';

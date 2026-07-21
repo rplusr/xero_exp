@@ -1,24 +1,24 @@
 import { renderFullSVGDocument, CANVAS_WIDTH, CANVAS_HEIGHT } from './render.js';
 
-function download(blob, filename) {
-  const url = URL.createObjectURL(blob);
+// Plain data: URIs rather than Blob + createObjectURL — one less API that
+// needs particular permissions to work, and there's nothing to revoke.
+function download(dataUrl, filename) {
   const a = document.createElement('a');
-  a.href = url;
+  a.href = dataUrl;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export function exportSVG(ribbon, filename = 'composition.svg') {
   const svgStr = renderFullSVGDocument(ribbon);
-  download(new Blob([svgStr], { type: 'image/svg+xml' }), filename);
+  download(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`, filename);
 }
 
 export function exportPNG(ribbon, { scale = 3, filename = 'composition.png' } = {}) {
   const svgStr = renderFullSVGDocument(ribbon);
-  const url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
+  const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgStr)}`;
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -29,16 +29,10 @@ export function exportPNG(ribbon, { scale = 3, filename = 'composition.png' } = 
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-      canvas.toBlob((blob) => {
-        download(blob, filename);
-        resolve();
-      }, 'image/png');
+      download(canvas.toDataURL('image/png'), filename);
+      resolve();
     };
-    img.onerror = (e) => {
-      URL.revokeObjectURL(url);
-      reject(e);
-    };
-    img.src = url;
+    img.onerror = () => reject(new Error('Could not rasterise the SVG for PNG export.'));
+    img.src = svgDataUrl;
   });
 }
