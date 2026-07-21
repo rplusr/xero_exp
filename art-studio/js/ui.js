@@ -1,14 +1,7 @@
 import { PATTERNS } from './patterns.js';
-import { WARP_TYPES } from './warps.js';
-import { CANVAS_WIDTH, CANVAS_HEIGHT, renderSVGInner } from './render.js';
+import { renderSVGInner } from './render.js';
 import { exportSVG, exportPNG } from './export.js';
 import { PALETTE } from './palette.js';
-
-const WARP_LABELS = {
-  cylinder: 'Cylinder / Curl',
-  fold: 'Fold',
-  perspective: 'Perspective Plane',
-};
 
 function setByPath(obj, path, value) {
   const parts = path.split('.');
@@ -44,11 +37,29 @@ function fieldMarkup({ label, dataAttr, key, type, min, max, step, value }) {
     </label>`;
 }
 
+const RIBBON_FIELDS = [
+  { label: 'Loop width X', key: 'path.ax1', min: 150, max: 420, step: 1 },
+  { label: 'Loop width Y', key: 'path.ay1', min: 100, max: 280, step: 1 },
+  { label: 'Wobble', key: 'wobble', min: 20, max: 90, step: 1 },
+  { label: 'Frequency X', key: 'path.fx1', min: 1, max: 4, step: 1 },
+  { label: 'Frequency Y', key: 'path.fy1', min: 1, max: 4, step: 1 },
+  { label: 'Ribbon width', key: 'baseWidth', min: 30, max: 180, step: 1 },
+  { label: 'Pinch width', key: 'pinchWidth', min: 2, max: 70, step: 1 },
+  { label: 'Pinch tightness', key: 'pinchRadius', min: 0.01, max: 0.12, step: 0.005 },
+];
+
+function readRibbonFieldValue(studio, key) {
+  if (key === 'wobble') return studio.path.ax2;
+  if (key.startsWith('path.')) return studio.path[key.slice(5)];
+  return studio[key];
+}
+
 export function initUI(studio) {
   const canvas = document.getElementById('canvas');
-  const layerList = document.getElementById('layerList');
-  const sheetControls = document.getElementById('sheetControls');
-  const addSheetBtn = document.getElementById('addSheetBtn');
+  const zoneList = document.getElementById('zoneList');
+  const zoneControls = document.getElementById('zoneControls');
+  const ribbonControls = document.getElementById('ribbonControls');
+  const addZoneBtn = document.getElementById('addZoneBtn');
   const seedInput = document.getElementById('seedInput');
   const randomiseBtn = document.getElementById('randomiseBtn');
   const exportSvgBtn = document.getElementById('exportSvgBtn');
@@ -57,46 +68,53 @@ export function initUI(studio) {
   let lastControlsSig = null;
 
   function renderCanvas() {
-    canvas.innerHTML = renderSVGInner(studio.sheets);
+    canvas.innerHTML = renderSVGInner(studio.ribbon());
   }
 
-  function renderLayerList() {
-    const rows = [...studio.sheets]
-      .map((s, i) => ({ s, i }))
-      .reverse()
-      .map(({ s, i }) => {
-        const selected = s.id === studio.selectedId ? ' selected' : '';
-        const [c1, c2] = s.fill.colors;
-        const swatch = `linear-gradient(135deg, ${c1} 50%, ${c2} 50%)`;
-        const linkTag = i === 0 ? 'Ribbon start' : 'Linked';
+  function renderRibbonControls() {
+    ribbonControls.innerHTML = RIBBON_FIELDS.map((f) =>
+      fieldMarkup({
+        label: f.label,
+        dataAttr: 'data-ribbon',
+        key: f.key,
+        type: 'range',
+        min: f.min,
+        max: f.max,
+        step: f.step,
+        value: readRibbonFieldValue(studio, f.key),
+      })
+    ).join('');
+  }
+
+  function renderZoneList() {
+    const rows = studio.zones
+      .map((z, i) => {
+        const selected = z.id === studio.selectedId ? ' selected' : '';
         return `
-        <li class="layer-row${selected}" data-id="${s.id}">
-          <span class="layer-swatch" style="background:${swatch}"></span>
+        <li class="layer-row${selected}" data-id="${z.id}">
+          <span class="layer-swatch" style="background:${z.color}"></span>
           <span class="layer-text">
-            <span class="layer-label">${PATTERNS[s.pattern].label}</span>
-            <span class="layer-sub">${WARP_LABELS[s.warpType]} · ${linkTag}</span>
+            <span class="layer-label">${PATTERNS[z.pattern].label}</span>
+            <span class="layer-sub">Zone ${i + 1}</span>
           </span>
           <span class="layer-actions">
-            <button data-action="up" title="Bring forward (])">&uarr;</button>
-            <button data-action="down" title="Send backward ([)">&darr;</button>
+            <button data-action="up" title="Move earlier (])">&uarr;</button>
+            <button data-action="down" title="Move later ([)">&darr;</button>
             <button data-action="dup" title="Duplicate (⌘D)">&#10064;</button>
             <button data-action="del" title="Delete (Backspace)">&times;</button>
           </span>
         </li>`;
       })
       .join('');
-    layerList.innerHTML = rows || '<li class="layer-empty">No sheets — press A to add one</li>';
+    zoneList.innerHTML = rows || '<li class="layer-empty">No zones — press A to add one</li>';
   }
 
-  function renderSheetControls() {
+  function renderZoneControls() {
     const sel = studio.selected();
     if (!sel) {
-      sheetControls.innerHTML = '';
+      zoneControls.innerHTML = '';
       return;
     }
-    const idx = studio.sheets.indexOf(sel);
-    const isFirst = idx === 0;
-
     const patternDef = PATTERNS[sel.pattern];
     const patternFields = patternDef.paramsSchema
       .map((f) =>
@@ -113,36 +131,10 @@ export function initUI(studio) {
       )
       .join('');
 
-    const placementFields = isFirst
-      ? `
-        ${fieldMarkup({ label: 'Rotation', dataAttr: 'data-field', key: 'rotation', type: 'range', min: -180, max: 180, step: 1, value: sel.rotation })}
-        ${fieldMarkup({ label: 'Position X', dataAttr: 'data-field', key: 'position.x', type: 'range', min: -200, max: CANVAS_WIDTH + 200, step: 1, value: sel.position.x })}
-        ${fieldMarkup({ label: 'Position Y', dataAttr: 'data-field', key: 'position.y', type: 'range', min: -200, max: CANVAS_HEIGHT + 200, step: 1, value: sel.position.y })}
-      `
-      : `
-        ${fieldMarkup({ label: 'Turn from previous', dataAttr: 'data-field', key: 'turnDelta', type: 'range', min: -150, max: 150, step: 1, value: sel.turnDelta || 0 })}
-      `;
-
-    sheetControls.innerHTML = `
+    zoneControls.innerHTML = `
       <div class="panel-section">
-        <div class="section-head">
-          <h2>Sheet</h2>
-          <span class="chain-badge">${isFirst ? 'Ribbon start' : `Linked to segment ${idx}`}</span>
-        </div>
-        <label class="field">
-          <span>Warp</span>
-          <select data-field="warpType">
-            ${WARP_TYPES.map((w) => `<option value="${w}" ${w === sel.warpType ? 'selected' : ''}>${WARP_LABELS[w]}</option>`).join('')}
-          </select>
-        </label>
-        ${fieldMarkup({ label: 'Warp amount', dataAttr: 'data-field', key: 'warpAmount', type: 'range', min: -1, max: 1, step: 0.01, value: sel.warpAmount })}
-        ${placementFields}
-        ${fieldMarkup({ label: 'Scale', dataAttr: 'data-field', key: 'scale', type: 'range', min: 60, max: 800, step: 1, value: sel.scale })}
-      </div>
-      <div class="panel-section">
-        <h2>Fill</h2>
-        ${fieldMarkup({ label: 'Colour 1', dataAttr: 'data-field', key: 'fill.colors.0', type: 'swatch', value: sel.fill.colors[0] })}
-        ${fieldMarkup({ label: 'Colour 2 (shadow)', dataAttr: 'data-field', key: 'fill.colors.1', type: 'swatch', value: sel.fill.colors[1] })}
+        <h2>Colour</h2>
+        ${fieldMarkup({ label: 'Zone colour', dataAttr: 'data-field', key: 'color', type: 'swatch', value: sel.color })}
       </div>
       <div class="panel-section">
         <div class="section-head">
@@ -161,25 +153,43 @@ export function initUI(studio) {
 
   function controlsSignature() {
     const sel = studio.selected();
-    if (!sel) return 'none';
-    const idx = studio.sheets.indexOf(sel);
-    return `${sel.id}:${sel.pattern}:${sel.warpType}:${idx === 0}`;
+    return sel ? `${sel.id}:${sel.pattern}` : 'none';
   }
 
   function onStudioChange() {
     renderCanvas();
-    renderLayerList();
+    renderZoneList();
     const sig = controlsSignature();
     if (sig !== lastControlsSig) {
-      renderSheetControls();
+      renderZoneControls();
       lastControlsSig = sig;
     }
   }
 
   studio.onChange(onStudioChange);
+  renderRibbonControls();
 
-  // --- Layer list interactions ---------------------------------------------
-  layerList.addEventListener('click', (e) => {
+  // --- Ribbon shape controls -------------------------------------------
+  ribbonControls.addEventListener('input', (e) => {
+    const t = e.target;
+    if (!t.dataset.ribbon) return;
+    const value = parseFloat(t.value);
+    const key = t.dataset.ribbon;
+    if (key === 'wobble') {
+      studio.path.ax2 = value;
+      studio.path.ay2 = value;
+      studio.notify();
+    } else if (key.startsWith('path.')) {
+      studio.path[key.slice(5)] = value;
+      studio.notify();
+    } else {
+      studio[key] = value;
+      studio.notify();
+    }
+  });
+
+  // --- Zone list interactions ------------------------------------------
+  zoneList.addEventListener('click', (e) => {
     const row = e.target.closest('.layer-row');
     if (!row) return;
     const id = row.dataset.id;
@@ -187,19 +197,19 @@ export function initUI(studio) {
     if (btn) {
       e.stopPropagation();
       const action = btn.dataset.action;
-      if (action === 'up') studio.moveSheet(id, 1);
-      else if (action === 'down') studio.moveSheet(id, -1);
-      else if (action === 'dup') studio.duplicateSheet(id);
-      else if (action === 'del') studio.removeSheet(id);
+      if (action === 'up') studio.moveZone(id, -1);
+      else if (action === 'down') studio.moveZone(id, 1);
+      else if (action === 'dup') studio.duplicateZone(id);
+      else if (action === 'del') studio.removeZone(id);
       return;
     }
     studio.select(id);
   });
 
-  addSheetBtn.addEventListener('click', () => studio.addSheet());
+  addZoneBtn.addEventListener('click', () => studio.addZone());
 
-  // --- Sheet controls interactions -----------------------------------------
-  sheetControls.addEventListener('input', (e) => {
+  // --- Zone controls interactions ---------------------------------------
+  zoneControls.addEventListener('input', (e) => {
     const t = e.target;
     const sel = studio.selected();
     if (!sel) return;
@@ -218,7 +228,7 @@ export function initUI(studio) {
     }
   });
 
-  sheetControls.addEventListener('click', (e) => {
+  zoneControls.addEventListener('click', (e) => {
     const btn = e.target.closest('.swatch-btn');
     if (!btn) return;
     const sel = studio.selected();
@@ -227,27 +237,28 @@ export function initUI(studio) {
     if (btn.dataset.field) setByPath(sel, btn.dataset.field, hex);
     else if (btn.dataset.param) sel.patternParams[btn.dataset.param] = hex;
     studio.notify();
-    renderSheetControls();
+    renderZoneControls();
     lastControlsSig = controlsSignature();
   });
 
-  // --- Seed + randomise ------------------------------------------------------
+  // --- Seed + randomise ---------------------------------------------------
   function randomiseWithNewSeed() {
     const newSeed = Math.floor(Math.random() * 1e6).toString();
     seedInput.value = newSeed;
     studio.randomise(newSeed);
+    renderRibbonControls();
   }
 
   randomiseBtn.addEventListener('click', randomiseWithNewSeed);
 
   exportSvgBtn.addEventListener('click', () => {
-    exportSVG(studio.sheets, `sheets-${studio.seed}.svg`);
+    exportSVG(studio.ribbon(), `ribbon-${studio.seed}.svg`);
   });
   exportPngBtn.addEventListener('click', async () => {
     exportPngBtn.disabled = true;
     exportPngBtn.textContent = 'Exporting…';
     try {
-      await exportPNG(studio.sheets, { scale: 3, filename: `sheets-${studio.seed}.png` });
+      await exportPNG(studio.ribbon(), { scale: 3, filename: `ribbon-${studio.seed}.png` });
     } catch (err) {
       console.error('PNG export failed', err);
     } finally {
@@ -259,11 +270,13 @@ export function initUI(studio) {
     if (e.key === 'Enter') {
       e.preventDefault();
       studio.randomise(seedInput.value.trim() || '1');
+      renderRibbonControls();
       seedInput.blur();
     }
   });
   seedInput.addEventListener('blur', () => {
     studio.randomise(seedInput.value.trim() || '1');
+    renderRibbonControls();
   });
 
   // --- Keyboard shortcuts ------------------------------------------------
@@ -274,7 +287,7 @@ export function initUI(studio) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
       if (studio.selectedId) {
         e.preventDefault();
-        studio.duplicateSheet(studio.selectedId);
+        studio.duplicateZone(studio.selectedId);
       }
       return;
     }
@@ -284,13 +297,13 @@ export function initUI(studio) {
     if (e.key.toLowerCase() === 'r') {
       randomiseWithNewSeed();
     } else if (e.key === 'a') {
-      studio.addSheet();
+      studio.addZone();
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
-      if (studio.selectedId) studio.removeSheet(studio.selectedId);
+      if (studio.selectedId) studio.removeZone(studio.selectedId);
     } else if (e.key === ']') {
-      if (studio.selectedId) studio.moveSheet(studio.selectedId, 1);
+      if (studio.selectedId) studio.moveZone(studio.selectedId, 1);
     } else if (e.key === '[') {
-      if (studio.selectedId) studio.moveSheet(studio.selectedId, -1);
+      if (studio.selectedId) studio.moveZone(studio.selectedId, -1);
     }
   });
 

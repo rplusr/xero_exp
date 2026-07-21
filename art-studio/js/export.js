@@ -11,13 +11,13 @@ function download(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export function exportSVG(sheets, filename = 'composition.svg') {
-  const svgStr = renderFullSVGDocument(sheets);
+export function exportSVG(ribbon, filename = 'composition.svg') {
+  const svgStr = renderFullSVGDocument(ribbon);
   download(new Blob([svgStr], { type: 'image/svg+xml' }), filename);
 }
 
-export function exportPNG(sheets, { scale = 3, filename = 'composition.png' } = {}) {
-  const svgStr = renderFullSVGDocument(sheets);
+export function exportPNG(ribbon, { scale = 3, filename = 'composition.png' } = {}) {
+  const svgStr = renderFullSVGDocument(ribbon);
   const url = URL.createObjectURL(new Blob([svgStr], { type: 'image/svg+xml' }));
   return new Promise((resolve, reject) => {
     const img = new Image();

@@ -20,12 +20,13 @@ function crossHalftone(project, params, unitScale) {
     color = '#e11d3f',
   } = params;
 
+  const uMax = project.uMax || 1;
   let d = '';
   for (let v = spacing / 2; v < 1; v += spacing) {
     const t = invert ? 1 - v : v;
     const size = spacing * (minSize + (maxSize - minSize) * clamp01(t));
     const hsPx = (size / 2) * unitScale;
-    for (let u = spacing / 2; u < 1; u += spacing) {
+    for (let u = spacing / 2; u < uMax; u += spacing) {
       const c = project(u, v);
       d += `M ${(c.x - hsPx).toFixed(2)},${c.y.toFixed(2)} L ${(c.x + hsPx).toFixed(2)},${c.y.toFixed(2)} `;
       d += `M ${c.x.toFixed(2)},${(c.y - hsPx).toFixed(2)} L ${c.x.toFixed(2)},${(c.y + hsPx).toFixed(2)} `;
@@ -51,19 +52,30 @@ function crossHalftone(project, params, unitScale) {
 // fiddly line/square clipping math entirely.
 function diagonalHatch(project, params) {
   const { spacing = 0.05, angleDeg = 45, strokeWidth = 1.2, color = '#1c2340', samples = 10 } = params;
+  const uMax = project.uMax || 1;
   const rad = (angleDeg * Math.PI) / 180;
   const dirX = Math.cos(rad);
   const dirY = Math.sin(rad);
   const nx = -dirY;
   const ny = dirX;
-  const MARGIN = 0.9;
+  const cx = uMax / 2;
+  const cy = 0.5;
+  const pad = 0.15;
+  // Extent of the [0,uMax]x[0,1] box projected onto each sweep direction —
+  // just enough to cover the box exactly, rather than a generous overestimate.
+  // Overshooting here matters more than it did for flat sheets: past the
+  // zone's own span the ribbon can be tapering sharply toward a twist, and
+  // an oversized sweep samples points that land far from the visible strip,
+  // showing up as stray whiskers once the clip crops everything back.
+  const tMargin = Math.abs(dirX) * (uMax / 2) + Math.abs(dirY) * 0.5 + pad;
+  const kMargin = Math.abs(nx) * (uMax / 2) + Math.abs(ny) * 0.5 + pad;
 
   let d = '';
-  for (let k = -MARGIN; k <= MARGIN; k += spacing) {
-    const ox = 0.5 + nx * k;
-    const oy = 0.5 + ny * k;
+  for (let k = -kMargin; k <= kMargin; k += spacing) {
+    const ox = cx + nx * k;
+    const oy = cy + ny * k;
     for (let i = 0; i <= samples; i++) {
-      const t = -MARGIN + (2 * MARGIN * i) / samples;
+      const t = -tMargin + (2 * tMargin * i) / samples;
       const u = ox + dirX * t;
       const v = oy + dirY * t;
       const p = project(u, v);
@@ -82,12 +94,13 @@ function diagonalHatch(project, params) {
 function checkerDiamonds(project, params) {
   const { spacing = 0.09, colorA = '#0b1130', colorB = '#ff2d55', gap = 0.12 } = params;
 
+  const uMax = project.uMax || 1;
   let dA = '';
   let dB = '';
   let row = 0;
   for (let v = spacing / 2; v < 1; v += spacing, row++) {
     let col = 0;
-    for (let u = spacing / 2; u < 1; u += spacing, col++) {
+    for (let u = spacing / 2; u < uMax; u += spacing, col++) {
       const h = (spacing / 2) * (1 - gap);
       const top = project(u, v - h);
       const right = project(u + h, v);
@@ -120,6 +133,7 @@ function chevronWeave(project, params) {
     color = '#3b1fb0',
     segSamples = 3,
   } = params;
+  const uMax = project.uMax || 1;
   const MARGIN = period * 2;
 
   let d = '';
@@ -127,7 +141,7 @@ function chevronWeave(project, params) {
   for (let v0 = rowHeight / 2; v0 < 1; v0 += rowHeight, row++) {
     const phase = (row % 2) * (period / 2);
     const start = -MARGIN + phase;
-    const end = 1 + MARGIN;
+    const end = uMax + MARGIN;
 
     const vertices = [];
     let idx = 0;
@@ -176,6 +190,7 @@ function petalWeave(project, params, unitScale) {
   } = params;
   const tex = TEXTURES.leaf;
   const maxDim = Math.max(tex.w, tex.h);
+  const uMax = project.uMax || 1;
   const MARGIN = period;
 
   const marks = [];
@@ -183,7 +198,7 @@ function petalWeave(project, params, unitScale) {
   for (let v0 = rowHeight / 2; v0 < 1; v0 += rowHeight, row++) {
     const phase = (row % 2) * (period / 2);
     let idx = 0;
-    for (let u = -MARGIN + phase; u <= 1 + MARGIN; u += period, idx++) {
+    for (let u = -MARGIN + phase; u <= uMax + MARGIN; u += period, idx++) {
       const vOff = idx % 2 === 0 ? -amplitude : amplitude;
       const c = project(u, v0 + vOff);
       const sizePx = scale * period * unitScale;
