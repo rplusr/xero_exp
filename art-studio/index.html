@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Studio — Generative Sheets</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">Studio</div>
+      <div class="topbar-actions">
+        <label class="seed-field">
+          <span>Seed</span>
+          <input type="text" id="seedInput" value="1" spellcheck="false" />
+        </label>
+        <button class="btn" id="randomiseBtn" title="Randomise (R)">Randomise</button>
+        <div class="divider"></div>
+        <button class="btn" id="exportSvgBtn">Export SVG</button>
+        <button class="btn btn-primary" id="exportPngBtn">Export PNG</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="canvas-pane">
+        <div class="canvas-frame">
+          <svg id="canvas" viewBox="0 0 960 640" width="960" height="640"></svg>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-section">
+          <h2>Sheet</h2>
+
+          <label class="field">
+            <span>Warp</span>
+            <select id="warpType">
+              <option value="cylinder">Cylinder / Curl</option>
+              <option value="fold">Fold</option>
+              <option value="perspective">Perspective Plane</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Warp amount</span>
+            <input type="range" id="warpAmount" min="-1" max="1" step="0.01" value="0.55" />
+          </label>
+
+          <label class="field">
+            <span>Rotation</span>
+            <input type="range" id="rotation" min="-180" max="180" step="1" value="0" />
+          </label>
+
+          <label class="field">
+            <span>Scale</span>
+            <input type="range" id="scale" min="100" max="800" step="1" value="480" />
+          </label>
+
+          <label class="field">
+            <span>Position X</span>
+            <input type="range" id="posX" min="0" max="960" step="1" value="480" />
+          </label>
+
+          <label class="field">
+            <span>Position Y</span>
+            <input type="range" id="posY" min="0" max="640" step="1" value="320" />
+          </label>
+        </div>
+
+        <div class="panel-section">
+          <h2>Gradient</h2>
+          <label class="field field-row">
+            <span>Stop 1</span>
+            <input type="color" id="gradStop1" value="#eafff6" />
+          </label>
+          <label class="field field-row">
+            <span>Stop 2</span>
+            <input type="color" id="gradStop2" value="#6fe3c4" />
+          </label>
+          <label class="field">
+            <span>Angle</span>
+            <input type="range" id="gradAngle" min="0" max="360" step="1" value="20" />
+          </label>
+        </div>
+
+        <div class="panel-section">
+          <h2>Pattern — Cross Halftone</h2>
+          <label class="field">
+            <span>Spacing</span>
+            <input type="range" id="pSpacing" min="0.015" max="0.09" step="0.001" value="0.045" />
+          </label>
+          <label class="field">
+            <span>Min size</span>
+            <input type="range" id="pMinSize" min="0" max="1" step="0.01" value="0.2" />
+          </label>
+          <label class="field">
+            <span>Max size</span>
+            <input type="range" id="pMaxSize" min="0" max="1.4" step="0.01" value="1.0" />
+          </label>
+          <label class="field field-row">
+            <span>Colour</span>
+            <input type="color" id="pColor" value="#e11d3f" />
+          </label>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
