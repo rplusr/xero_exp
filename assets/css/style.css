@@ -888,9 +888,14 @@ a { color: inherit; }
   padding: var(--space-5);
   border-right: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
+  background: #FFFFFF;
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 600ms var(--ease), transform 600ms var(--ease);
+  transition: opacity 600ms var(--ease), transform 600ms var(--ease), background-color 400ms var(--ease);
+}
+
+.attribute-item:hover {
+  background: #F2F1EE;
 }
 
 .attribute-item:nth-child(3n) {
