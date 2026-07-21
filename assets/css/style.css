@@ -1012,7 +1012,8 @@ a { color: inherit; }
   .mega-panel { display: none; }
   .brand-subtitle { display: none; }
   .values-zones { grid-template-columns: repeat(2, 1fr); }
-  .values-card { width: 168px; }
+  .values-zone { width: min(152px, 100%); }
+  .values-card { width: 152px; }
 }
 
 /* ---------------------------------------------------------------- */
