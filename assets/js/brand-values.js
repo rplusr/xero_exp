@@ -2,7 +2,10 @@
   var wrap = document.getElementById("values-stack-wrap");
   var stack = document.getElementById("values-stack");
   var zonesEl = document.getElementById("values-zones");
-  if (!wrap || !stack || !zonesEl) return;
+  var goxeroEl = document.getElementById("values-goxero");
+  var canvas = document.getElementById("values-vortex-canvas");
+  if (!wrap || !stack || !zonesEl || !goxeroEl || !canvas) return;
+  var ctx = canvas.getContext("2d");
 
   var ICON_BASE = "assets/img/charms/";
   var ICON_NAMES = [
@@ -57,8 +60,17 @@
   var PILE_ANGLE_MAX = 16;
   var TILT_MAX_DEG = 14;
   var PARALLAX_MAX_PX = 12;
+  var GRID_PHASE_END = 0.45;
+  var PARTICLE_COUNT = 90;
 
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function easeOutBack(x) {
+    var c1 = 1.70158, c3 = c1 + 1;
+    return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+  }
+
+  function clamp01(v) { return Math.min(1, Math.max(0, v)); }
 
   function shuffle(arr) {
     var a = arr.slice();
@@ -182,21 +194,67 @@
     });
   }
 
+  var sinkPoint = { x: 0, y: 0 };
+  var currentVortexProgress = 0;
+
   function applyProgress(progress) {
+    var cardProgress = reduceMotion ? GRID_PHASE_END : progress;
+    var t = Math.min(1, cardProgress / GRID_PHASE_END);
+
     for (var i = 0; i < cards.length; i++) {
       var p = pileState[i];
       var d = deltaState[i] || { dx: 0, dy: 0 };
-      var x = p.x + d.dx * progress;
-      var y = p.y + d.dy * progress;
-      var rot = p.rot * (1 - progress);
+      var gridX = p.x + d.dx * t;
+      var gridY = p.y + d.dy * t;
+      var x = gridX;
+      var y = gridY;
+      var rot = p.rot * (1 - t);
+      var scale = 1;
+      var opacity = 1;
+      var blur = 0;
+
+      if (cardProgress > GRID_PHASE_END) {
+        var vp = clamp01((cardProgress - GRID_PHASE_END) / (1 - GRID_PHASE_END));
+        var ve = vp * vp;
+        var finalGridX = p.x + d.dx;
+        var finalGridY = p.y + d.dy;
+        var toSinkX = sinkPoint.x - finalGridX;
+        var toSinkY = sinkPoint.y - finalGridY;
+        var dist = Math.sqrt(toSinkX * toSinkX + toSinkY * toSinkY);
+        var baseAngle = Math.atan2(toSinkY, toSinkX);
+        var spins = 2.1 + (i % CARD_COUNT) * 0.4;
+        var angle = baseAngle + ve * spins * Math.PI * 2;
+        var radius = dist * (1 - ve);
+        x = sinkPoint.x - Math.cos(angle) * radius;
+        y = sinkPoint.y - Math.sin(angle) * radius;
+        rot = ve * spins * 360;
+        scale = 1 - ve * 0.94;
+        opacity = 1 - Math.pow(ve, 2.4);
+        blur = ve * 9;
+      }
+
       cards[i].style.transform =
-        "translate(calc(-50% + " + x.toFixed(1) + "px), calc(-50% + " + y.toFixed(1) + "px)) rotate(" + rot.toFixed(2) + "deg)";
+        "translate(calc(-50% + " + x.toFixed(1) + "px), calc(-50% + " + y.toFixed(1) + "px)) rotate(" + rot.toFixed(2) + "deg) scale(" + scale.toFixed(3) + ")";
       cards[i].style.zIndex = String(cards.length - i);
+      cards[i].style.opacity = opacity.toFixed(3);
+      cards[i].style.filter = blur > 0.4 ? "blur(" + blur.toFixed(1) + "px)" : "";
+      cards[i].style.pointerEvents = opacity < 0.15 ? "none" : "";
     }
+
+    var goxeroProgress = reduceMotion ? 1 : clamp01((progress - GRID_PHASE_END) / (1 - GRID_PHASE_END));
+    var goxeroScale = 0.55 + 0.45 * easeOutBack(goxeroProgress);
+    var goxeroOpacity = Math.min(1, goxeroProgress * 1.3);
+    goxeroEl.style.transform = "translate(-50%, -50%) scale(" + goxeroScale.toFixed(3) + ")";
+    goxeroEl.style.opacity = goxeroOpacity.toFixed(3);
+
+    currentVortexProgress = goxeroProgress;
   }
 
   function measure() {
     applyProgress(0);
+    var stackRect = stack.getBoundingClientRect();
+    var containerCx = stackRect.left + stackRect.width / 2;
+    var containerCy = stackRect.top + stackRect.height / 2;
     deltaState = cards.map(function (card, i) {
       var cardRect = card.getBoundingClientRect();
       var zoneRect = zones[i].getBoundingClientRect();
@@ -206,6 +264,96 @@
       var zoneCy = zoneRect.top + zoneRect.height / 2;
       return { dx: zoneCx - cardCx, dy: zoneCy - cardCy };
     });
+    var goxeroRect = goxeroEl.getBoundingClientRect();
+    sinkPoint = {
+      x: (goxeroRect.left + goxeroRect.width / 2) - containerCx,
+      y: (goxeroRect.top + goxeroRect.height / 2) - containerCy
+    };
+  }
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var canvasCssWidth = 0;
+  var canvasCssHeight = 0;
+  var particles = [];
+
+  function resizeCanvas() {
+    var rect = canvas.getBoundingClientRect();
+    canvasCssWidth = rect.width;
+    canvasCssHeight = rect.height;
+    canvas.width = Math.max(1, Math.round(rect.width * dpr));
+    canvas.height = Math.max(1, Math.round(rect.height * dpr));
+  }
+
+  function initParticles() {
+    var maxR = Math.min(canvasCssWidth, canvasCssHeight) * 0.46;
+    particles = [];
+    for (var i = 0; i < PARTICLE_COUNT; i++) {
+      var r = maxR * (0.3 + Math.random() * 0.7);
+      particles.push({
+        angle: Math.random() * Math.PI * 2,
+        radius: r,
+        maxRadius: r,
+        speed: 0.5 + Math.random() * 1.3,
+        size: 1 + Math.random() * 2.4
+      });
+    }
+  }
+
+  var lastTime = null;
+
+  function renderVortex(now) {
+    requestAnimationFrame(renderVortex);
+    if (lastTime === null) lastTime = now;
+    var dt = Math.min(48, now - lastTime) / 1000;
+    lastTime = now;
+
+    var vp = currentVortexProgress;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (vp <= 0.001) return;
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    var cx = canvasCssWidth / 2 + sinkPoint.x;
+    var cy = canvasCssHeight / 2 + sinkPoint.y;
+
+    var glowR = 70 + vp * 90;
+    var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+    grad.addColorStop(0, "rgba(19, 181, 234, " + (0.22 * vp).toFixed(3) + ")");
+    grad.addColorStop(1, "rgba(19, 181, 234, 0)");
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalCompositeOperation = "lighter";
+    for (var i = 0; i < particles.length; i++) {
+      var pt = particles[i];
+      var spin = (0.4 + vp * 3.2) * pt.speed;
+      var drain = (0.06 + vp * 0.9) * pt.speed;
+      var prevAngle = pt.angle;
+      var prevRadius = pt.radius;
+      pt.angle += spin * dt;
+      pt.radius -= drain * dt * pt.maxRadius * 0.35;
+      if (pt.radius <= 4) {
+        pt.radius = pt.maxRadius;
+        pt.angle = Math.random() * Math.PI * 2;
+        prevAngle = pt.angle;
+        prevRadius = pt.radius;
+      }
+      var x1 = cx + Math.cos(prevAngle) * prevRadius;
+      var y1 = cy + Math.sin(prevAngle) * prevRadius;
+      var x2 = cx + Math.cos(pt.angle) * pt.radius;
+      var y2 = cy + Math.sin(pt.angle) * pt.radius;
+      var alpha = vp * (0.15 + 0.55 * (1 - pt.radius / pt.maxRadius));
+      ctx.strokeStyle = "rgba(19, 181, 234, " + alpha.toFixed(3) + ")";
+      ctx.lineWidth = pt.size;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   var ticking = false;
@@ -226,8 +374,10 @@
   var resizeTimer;
 
   function init() {
+    resizeCanvas();
     randomizePile();
     measure();
+    initParticles();
     onScroll();
   }
 
@@ -239,4 +389,5 @@
 
   buildCards();
   init();
+  if (!reduceMotion) requestAnimationFrame(renderVortex);
 })();
