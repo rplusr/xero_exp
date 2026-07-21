@@ -98,14 +98,21 @@
       front.className = "values-card-face values-card-front";
       var frontInner = document.createElement("div");
       frontInner.className = "values-card-face-inner";
+      var eyebrow = document.createElement("span");
+      eyebrow.className = "values-card-eyebrow";
+      eyebrow.textContent = ("0" + (i + 1)) + ".";
+      var imageWrap = document.createElement("div");
+      imageWrap.className = "values-card-image-wrap";
       var img = document.createElement("img");
       img.className = "values-card-image";
       img.src = iconSrc(icons[i]);
       img.alt = "";
+      imageWrap.appendChild(img);
       var label = document.createElement("span");
       label.className = "values-card-label";
       label.textContent = value.name;
-      frontInner.appendChild(img);
+      frontInner.appendChild(eyebrow);
+      frontInner.appendChild(imageWrap);
       frontInner.appendChild(label);
       front.appendChild(frontInner);
 
