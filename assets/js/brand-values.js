@@ -24,19 +24,37 @@
 
   function iconSrc(name) { return ICON_BASE + name; }
 
-  // placeholder value names/descriptors — swap for the real four
   var VALUES = [
-    { name: "Human", descriptor: "Warm, personal, and real in every interaction." },
-    { name: "Beautiful", descriptor: "Considered design in every last detail." },
-    { name: "Straightforward", descriptor: "Clear and simple, no unnecessary jargon." },
-    { name: "Smart", descriptor: "Thoughtful solutions that just work." }
+    {
+      name: "Go Bold",
+      color: "#CF89FE",
+      lead: "We go bold",
+      reason: "because the future belongs to the ones building it, not debating it."
+    },
+    {
+      name: "Go Fast",
+      color: "#FF719B",
+      lead: "We go fast",
+      reason: "because the world doesn't slow down for anyone, and neither should we."
+    },
+    {
+      name: "Go Further",
+      color: "#FDCC08",
+      lead: "We go further",
+      reason: "because of the customers counting on us, and for the teammates building with us."
+    },
+    {
+      name: "Go Together",
+      color: "#6AEAAA",
+      lead: "We go together",
+      reason: "because no one wins alone, and the best of us makes the rest of us better."
+    }
   ];
 
   var CARD_COUNT = VALUES.length;
   var PILE_JITTER_X = 30;
   var PILE_JITTER_Y = 20;
   var PILE_ANGLE_MAX = 16;
-  var PILE_LIFT_FRACTION = 0.18;
   var TILT_MAX_DEG = 14;
   var PARALLAX_MAX_PX = 12;
 
@@ -64,8 +82,11 @@
     zones = [];
 
     for (var i = 0; i < CARD_COUNT; i++) {
+      var value = VALUES[i];
+
       var card = document.createElement("div");
       card.className = "values-card";
+      card.style.setProperty("--value-color", value.color);
 
       var tilt = document.createElement("div");
       tilt.className = "values-card-tilt";
@@ -81,21 +102,25 @@
       img.className = "values-card-image";
       img.src = iconSrc(icons[i]);
       img.alt = "";
+      var label = document.createElement("span");
+      label.className = "values-card-label";
+      label.textContent = value.name;
       frontInner.appendChild(img);
+      frontInner.appendChild(label);
       front.appendChild(frontInner);
 
       var back = document.createElement("div");
       back.className = "values-card-face values-card-back";
       var backInner = document.createElement("div");
       backInner.className = "values-card-face-inner";
-      var valueName = document.createElement("span");
-      valueName.className = "values-card-value-name";
-      valueName.textContent = VALUES[i].name;
-      var valueDescriptor = document.createElement("span");
-      valueDescriptor.className = "values-card-value-descriptor";
-      valueDescriptor.textContent = VALUES[i].descriptor;
-      backInner.appendChild(valueName);
-      backInner.appendChild(valueDescriptor);
+      var lead = document.createElement("span");
+      lead.className = "values-card-lead";
+      lead.textContent = value.lead;
+      var reason = document.createElement("span");
+      reason.className = "values-card-reason";
+      reason.textContent = value.reason;
+      backInner.appendChild(lead);
+      backInner.appendChild(reason);
       back.appendChild(backInner);
 
       flip.appendChild(front);
@@ -141,14 +166,10 @@
   }
 
   function randomizePile() {
-    // lift the pile up from dead-center toward where the fanned-out grid
-    // actually sits (top-anchored), so it starts close to the intro text
-    // instead of leaving a tall empty gap above a vertically-centered pile
-    var baseY = -(stack.offsetHeight * PILE_LIFT_FRACTION);
     pileState = cards.map(function () {
       return {
         x: (Math.random() - 0.5) * PILE_JITTER_X,
-        y: baseY + (Math.random() - 0.5) * PILE_JITTER_Y,
+        y: (Math.random() - 0.5) * PILE_JITTER_Y,
         rot: (Math.random() - 0.5) * PILE_ANGLE_MAX * 2
       };
     });

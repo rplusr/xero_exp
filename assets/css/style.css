@@ -875,14 +875,14 @@ a { color: inherit; }
   inset: 0;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  align-content: start;
+  align-content: center;
   gap: var(--space-4);
-  padding: var(--space-5) var(--space-6) var(--space-4);
+  padding: var(--space-6);
   pointer-events: none;
 }
 
 .values-zone {
-  width: min(220px, 100%);
+  width: min(264px, 100%);
   aspect-ratio: 3 / 4;
   margin: 0 auto;
 }
@@ -891,7 +891,7 @@ a { color: inherit; }
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 220px;
+  width: 264px;
   aspect-ratio: 3 / 4;
   cursor: pointer;
 }
@@ -934,42 +934,49 @@ a { color: inherit; }
 
 .values-card-face-inner {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-3);
   width: 100%;
   height: 100%;
   overflow: hidden;
   border-radius: 16px;
   box-shadow: var(--header-shadow);
+  text-align: center;
+  padding: var(--space-4);
 }
 
 .values-card-front .values-card-face-inner {
   background: var(--paper);
 }
 
-.values-card-back .values-card-face-inner {
-  background: var(--nav-text);
-  color: var(--paper);
-  flex-direction: column;
-  text-align: center;
-  padding: var(--space-4);
+.values-card-label {
+  font-size: var(--fs-body);
+  font-weight: var(--weight-bold);
+  color: var(--value-color, var(--nav-text));
 }
 
-.values-card-value-name {
+.values-card-back .values-card-face-inner {
+  background: var(--value-color, var(--nav-text));
+  color: var(--nav-text);
+}
+
+.values-card-lead {
   font-size: calc(var(--fs-mega) * 0.5);
   font-weight: var(--weight-bold);
-  margin: 0 0 var(--space-2);
+  margin: 0;
 }
 
-.values-card-value-descriptor {
+.values-card-reason {
   font-size: var(--fs-label);
   font-weight: var(--weight-text);
   line-height: 1.4;
-  opacity: 0.8;
+  opacity: 0.75;
 }
 
 .values-card-image {
-  width: 55%;
+  width: 50%;
   height: auto;
   transition: transform 320ms var(--ease);
 }
@@ -984,7 +991,7 @@ a { color: inherit; }
   .mega-panel { display: none; }
   .brand-subtitle { display: none; }
   .values-zones { grid-template-columns: repeat(2, 1fr); }
-  .values-card { width: 140px; }
+  .values-card { width: 168px; }
 }
 
 /* ---------------------------------------------------------------- */
