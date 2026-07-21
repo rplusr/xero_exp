@@ -1,11 +1,11 @@
 // SVG / PNG@2x export and clipboard helpers.
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
+const EXPORT_SVG_NS = 'http://www.w3.org/2000/svg';
 
 function prepareExportSvg(svg: SVGSVGElement, backgroundColor: string): SVGSVGElement {
   const clone = svg.cloneNode(true) as SVGSVGElement;
-  clone.setAttribute('xmlns', SVG_NS);
-  const bg = document.createElementNS(SVG_NS, 'rect');
+  clone.setAttribute('xmlns', EXPORT_SVG_NS);
+  const bg = document.createElementNS(EXPORT_SVG_NS, 'rect');
   bg.setAttribute('x', '0');
   bg.setAttribute('y', '0');
   bg.setAttribute('width', clone.getAttribute('width') || '0');
