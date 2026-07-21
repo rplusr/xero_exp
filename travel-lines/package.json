@@ -1,0 +1,13 @@
+{
+  "name": "travel-lines",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Generative subway-map-style line art tool.",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
