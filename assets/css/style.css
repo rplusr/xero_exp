@@ -971,31 +971,58 @@ a { color: inherit; }
 }
 
 .values-card:hover .values-card-face-inner {
-  box-shadow: var(--header-shadow), 0 0 0 2px rgba(19, 181, 234, 0.5), 0 0 28px 6px rgba(19, 181, 234, 0.5);
-  filter: brightness(1.1);
+  box-shadow: var(--header-shadow), 0 0 0 1px rgba(19, 181, 234, 0.35), 0 0 14px 2px rgba(19, 181, 234, 0.28);
+  filter: brightness(1.05);
 }
 
 .values-card-front .values-card-face-inner {
-  background: var(--nav-text);
-  justify-content: space-between;
+  background: #1F2121;
+  align-items: stretch;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 0;
+  padding: var(--space-3);
+  filter: saturate(0);
 }
 
-.values-card-image-wrap {
+.values-card:hover .values-card-front .values-card-face-inner {
+  filter: saturate(0) brightness(1.05);
+}
+
+.values-card-image-outer {
   flex: 1;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
+  overflow: hidden;
+  margin: 0 var(--space-2);
 }
 
-.values-card-eyebrow,
-.values-card-label {
-  font-family: var(--font-condensed);
-  font-weight: 700;
-  font-size: calc(var(--fs-body) * 2);
-  letter-spacing: -0.03em;
+.values-card-image-window {
+  position: relative;
+  margin-top: var(--space-2);
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.values-card-footer {
+  margin-top: var(--space-2);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3);
+  font-family: var(--font);
+}
+
+.values-card-footer-label {
+  font-size: var(--fs-label);
+  font-weight: var(--weight-text);
   color: var(--paper);
+}
+
+.values-card-footer-code {
+  font-size: var(--fs-label);
+  color: #D1D5DB;
+  opacity: 0.5;
 }
 
 .values-card-back .values-card-face-inner {
@@ -1017,9 +1044,15 @@ a { color: inherit; }
 }
 
 .values-card-image {
-  width: 50%;
-  height: auto;
-  transition: transform 320ms var(--ease);
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  background: #000000;
+  object-fit: cover;
+  filter: contrast(0.75);
+  box-shadow: 0 5px 6px rgba(0, 0, 0, 0.05);
 }
 
 /* ---------------------------------------------------------------- */
@@ -1034,6 +1067,7 @@ a { color: inherit; }
   .values-zones { grid-template-columns: repeat(2, 1fr); }
   .values-zone { width: min(152px, 100%); }
   .values-card { width: 152px; }
+  .values-card-front .values-card-face-inner { padding: var(--space-2); }
 }
 
 /* ---------------------------------------------------------------- */
