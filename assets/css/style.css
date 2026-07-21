@@ -950,9 +950,16 @@ a { color: inherit; }
   height: 100%;
   overflow: hidden;
   border-radius: 16px;
+  border: 1px solid #F2F1EE;
   box-shadow: var(--header-shadow);
   text-align: center;
   padding: var(--space-4);
+  transition: box-shadow 240ms var(--ease), filter 240ms var(--ease);
+}
+
+.values-card:hover .values-card-face-inner {
+  box-shadow: var(--header-shadow), 0 0 0 2px rgba(19, 181, 234, 0.5), 0 0 28px 6px rgba(19, 181, 234, 0.5);
+  filter: brightness(1.1);
 }
 
 .values-card-front .values-card-face-inner {
