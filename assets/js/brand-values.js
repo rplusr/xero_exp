@@ -22,6 +22,8 @@
     "twinkle.png", "wallet.png", "zen.png"
   ];
 
+  function iconSrc(name) { return ICON_BASE + name; }
+
   var CARD_COUNT = 8;
   var PILE_JITTER_X = 30;
   var PILE_JITTER_Y = 20;
@@ -68,7 +70,7 @@
       frontInner.className = "values-card-face-inner";
       var img = document.createElement("img");
       img.className = "values-card-image";
-      img.src = ICON_BASE + icons[i];
+      img.src = iconSrc(icons[i]);
       img.alt = "";
       frontInner.appendChild(img);
       front.appendChild(frontInner);
