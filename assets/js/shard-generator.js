@@ -14,45 +14,91 @@
 
   function $(id) { return document.getElementById(id); }
   function rand(min, max) { return min + Math.random() * (max - min); }
-  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function fmt(n) { return Math.round(n * 100) / 100; }
+  function sub(a, b) { return { x: a.x - b.x, y: a.y - b.y }; }
+  function dot(a, b) { return a.x * b.x + a.y * b.y; }
   function lerp(a, b, t) { return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }; }
-  function dist(a, b) { return Math.hypot(b.x - a.x, b.y - a.y); }
 
-  function polygonPoints(cx, cy, avgRadius, vertexCount, irregularity) {
-    var points = [];
-    var angleStep = (Math.PI * 2) / vertexCount;
-    for (var i = 0; i < vertexCount; i++) {
-      var angle = i * angleStep + rand(-angleStep * 0.35, angleStep * 0.35) * irregularity;
-      var radius = avgRadius * (1 + rand(-irregularity, irregularity));
-      points.push({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) });
+  function polygonArea(poly) {
+    var area = 0;
+    for (var i = 0; i < poly.length; i++) {
+      var a = poly[i], b = poly[(i + 1) % poly.length];
+      area += a.x * b.y - b.x * a.y;
     }
-    return points;
+    return Math.abs(area / 2);
   }
 
-  // rounds every vertex of a closed polygon by cutting in along each
-  // adjacent edge and joining the cuts with a quadratic curve through
-  // the original vertex, so corners stay soft instead of sharp
-  function roundedPolygonPath(points, roundness) {
-    var n = points.length;
-    var corners = [];
+  function polygonCentroid(poly) {
+    var cx = 0, cy = 0;
+    poly.forEach(function (p) { cx += p.x; cy += p.y; });
+    return { x: cx / poly.length, y: cy / poly.length };
+  }
+
+  // Sutherland-Hodgman half-plane clip: keeps the side of the line
+  // through `pivot` (with the given normal) that matches `keepPositive`
+  function clipHalfPlane(poly, pivot, normal, keepPositive) {
+    var result = [];
+    var n = poly.length;
     for (var i = 0; i < n; i++) {
-      var prev = points[(i - 1 + n) % n];
-      var curr = points[i];
-      var next = points[(i + 1) % n];
-      var lenPrev = dist(prev, curr);
-      var lenNext = dist(curr, next);
-      var r = Math.min(lenPrev, lenNext) * roundness;
-      var before = lerp(curr, prev, lenPrev > 0 ? r / lenPrev : 0);
-      var after = lerp(curr, next, lenNext > 0 ? r / lenNext : 0);
-      corners.push({ before: before, corner: curr, after: after });
+      var curr = poly[i];
+      var next = poly[(i + 1) % n];
+      var sideCurr = dot(sub(curr, pivot), normal);
+      var sideNext = dot(sub(next, pivot), normal);
+      var currIn = keepPositive ? sideCurr >= 0 : sideCurr <= 0;
+      var nextIn = keepPositive ? sideNext >= 0 : sideNext <= 0;
+      if (currIn) result.push(curr);
+      if (currIn !== nextIn && sideCurr !== sideNext) {
+        var t = sideCurr / (sideCurr - sideNext);
+        result.push(lerp(curr, next, t));
+      }
     }
-    var start = corners[n - 1].after;
-    var d = "M " + fmt(start.x) + " " + fmt(start.y);
-    for (var j = 0; j < n; j++) {
-      var c = corners[j];
-      d += " L " + fmt(c.before.x) + " " + fmt(c.before.y);
-      d += " Q " + fmt(c.corner.x) + " " + fmt(c.corner.y) + " " + fmt(c.after.x) + " " + fmt(c.after.y);
+    return result;
+  }
+
+  // splits a convex polygon in two with a random straight line through
+  // its centroid, retrying with a new angle if the cut is degenerate
+  function splitPolygon(poly) {
+    var pivot = polygonCentroid(poly);
+    for (var attempt = 0; attempt < 12; attempt++) {
+      var angle = rand(0, Math.PI);
+      var normal = { x: -Math.sin(angle), y: Math.cos(angle) };
+      var a = clipHalfPlane(poly, pivot, normal, true);
+      var b = clipHalfPlane(poly, pivot, normal, false);
+      if (a.length >= 3 && b.length >= 3 && polygonArea(a) > 1 && polygonArea(b) > 1) {
+        return [a, b];
+      }
+    }
+    return [poly];
+  }
+
+  function fracture(count) {
+    var polys = [
+      [
+        { x: 0, y: 0 },
+        { x: canvasW, y: 0 },
+        { x: canvasW, y: canvasH },
+        { x: 0, y: canvasH }
+      ]
+    ];
+
+    while (polys.length < count) {
+      var largestIdx = 0;
+      var largestArea = -1;
+      for (var i = 0; i < polys.length; i++) {
+        var a = polygonArea(polys[i]);
+        if (a > largestArea) { largestArea = a; largestIdx = i; }
+      }
+      var pieces = splitPolygon(polys[largestIdx]);
+      if (pieces.length === 1) break; // couldn't find a valid cut, stop early
+      polys.splice(largestIdx, 1, pieces[0], pieces[1]);
+    }
+    return polys;
+  }
+
+  function polygonToPath(poly) {
+    var d = "M " + fmt(poly[0].x) + " " + fmt(poly[0].y);
+    for (var i = 1; i < poly.length; i++) {
+      d += " L " + fmt(poly[i].x) + " " + fmt(poly[i].y);
     }
     d += " Z";
     return d;
@@ -60,61 +106,27 @@
 
   function generateShards() {
     var count = parseInt(els.count.value, 10);
-    var sizePct = parseInt(els.size.value, 10) / 100;
-    var spreadPct = parseInt(els.spread.value, 10) / 100;
-    var roundness = parseInt(els.roundness.value, 10) / 100;
-    var irregularity = parseInt(els.irregularity.value, 10) / 100;
     var paletteName = els.palette.value;
     var colors = PALETTES[paletteName].slice();
 
-    var minDim = Math.min(canvasW, canvasH);
-    var cx0 = canvasW / 2;
-    var cy0 = canvasH / 2;
-
-    shards = [];
-    for (var i = 0; i < count; i++) {
-      var cx = cx0 + rand(-spreadPct, spreadPct) * canvasW * 0.5;
-      var cy = cy0 + rand(-spreadPct, spreadPct) * canvasH * 0.5;
-      var radius = minDim * sizePct * rand(0.85, 1.15);
-      var vertexCount = Math.floor(rand(4, 7));
-      var points = polygonPoints(cx, cy, radius, vertexCount, irregularity);
-      var path = roundedPolygonPath(points, Math.min(roundness, 0.45));
-      var color = colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] : pick(PALETTES[paletteName]);
-
-      shards.push({ path: path, color: color });
-    }
+    var polys = fracture(count);
+    shards = polys.map(function (poly) {
+      var color = colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] : PALETTES[paletteName][0];
+      return { path: polygonToPath(poly), color: color };
+    });
   }
 
   function render() {
     var opacity = parseInt(els.opacity.value, 10) / 100;
-    var blend = els.blend.checked;
-    var shadow = els.shadow.checked;
     var bg = els.bg.value;
+    var crackWidth = parseInt(els.crackWidth.value, 10);
+    var crackColor = els.crackColor.value;
 
     var svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("xmlns", SVG_NS);
     svg.setAttribute("width", canvasW);
     svg.setAttribute("height", canvasH);
     svg.setAttribute("viewBox", "0 0 " + canvasW + " " + canvasH);
-
-    if (shadow) {
-      var defs = document.createElementNS(SVG_NS, "defs");
-      var filter = document.createElementNS(SVG_NS, "filter");
-      filter.setAttribute("id", "sg-shadow-filter");
-      filter.setAttribute("x", "-50%");
-      filter.setAttribute("y", "-50%");
-      filter.setAttribute("width", "200%");
-      filter.setAttribute("height", "200%");
-      var dropShadow = document.createElementNS(SVG_NS, "feDropShadow");
-      dropShadow.setAttribute("dx", "0");
-      dropShadow.setAttribute("dy", fmt(canvasH * 0.012));
-      dropShadow.setAttribute("stdDeviation", fmt(canvasH * 0.012));
-      dropShadow.setAttribute("flood-color", "#000000");
-      dropShadow.setAttribute("flood-opacity", "0.22");
-      filter.appendChild(dropShadow);
-      defs.appendChild(filter);
-      svg.appendChild(defs);
-    }
 
     var bgRect = document.createElementNS(SVG_NS, "rect");
     bgRect.setAttribute("x", "0");
@@ -125,7 +137,6 @@
     svg.appendChild(bgRect);
 
     var group = document.createElementNS(SVG_NS, "g");
-    if (shadow) group.setAttribute("filter", "url(#sg-shadow-filter)");
     svg.appendChild(group);
 
     shards.forEach(function (shard) {
@@ -133,7 +144,11 @@
       path.setAttribute("d", shard.path);
       path.setAttribute("fill", shard.color);
       path.setAttribute("fill-opacity", opacity);
-      if (blend) path.setAttribute("style", "mix-blend-mode: multiply");
+      if (crackWidth > 0) {
+        path.setAttribute("stroke", crackColor);
+        path.setAttribute("stroke-width", crackWidth);
+        path.setAttribute("stroke-linejoin", "round");
+      }
       group.appendChild(path);
     });
 
@@ -198,11 +213,8 @@
 
   function updateReadouts() {
     els.countValue.textContent = els.count.value;
-    els.sizeValue.textContent = els.size.value + "%";
-    els.spreadValue.textContent = els.spread.value + "%";
-    els.roundnessValue.textContent = els.roundness.value + "%";
-    els.irregularityValue.textContent = els.irregularity.value + "%";
     els.opacityValue.textContent = els.opacity.value + "%";
+    els.crackWidthValue.textContent = els.crackWidth.value + "px";
   }
 
   function init() {
@@ -210,20 +222,13 @@
     els.countValue = $("sg-count-value");
     els.w = $("sg-w");
     els.h = $("sg-h");
-    els.size = $("sg-size");
-    els.sizeValue = $("sg-size-value");
-    els.spread = $("sg-spread");
-    els.spreadValue = $("sg-spread-value");
-    els.roundness = $("sg-roundness");
-    els.roundnessValue = $("sg-roundness-value");
-    els.irregularity = $("sg-irregularity");
-    els.irregularityValue = $("sg-irregularity-value");
     els.palette = $("sg-palette");
     els.opacity = $("sg-opacity");
     els.opacityValue = $("sg-opacity-value");
     els.bg = $("sg-bg");
-    els.shadow = $("sg-shadow");
-    els.blend = $("sg-blend");
+    els.crackWidth = $("sg-crack-width");
+    els.crackWidthValue = $("sg-crack-width-value");
+    els.crackColor = $("sg-crack-color");
     els.shuffle = $("sg-shuffle");
     els.exportPng = $("sg-export-png");
     els.exportSvg = $("sg-export-svg");
@@ -232,11 +237,9 @@
 
     updateReadouts();
 
-    [els.count, els.size, els.spread, els.roundness, els.irregularity].forEach(function (input) {
-      input.addEventListener("input", function () {
-        updateReadouts();
-        regenerate();
-      });
+    els.count.addEventListener("input", function () {
+      updateReadouts();
+      regenerate();
     });
     els.palette.addEventListener("change", regenerate);
     [els.w, els.h].forEach(function (input) {
@@ -249,9 +252,12 @@
       updateReadouts();
       render();
     });
+    els.crackWidth.addEventListener("input", function () {
+      updateReadouts();
+      render();
+    });
+    els.crackColor.addEventListener("input", render);
     els.bg.addEventListener("input", render);
-    els.shadow.addEventListener("change", render);
-    els.blend.addEventListener("change", render);
     els.shuffle.addEventListener("click", regenerate);
     els.exportPng.addEventListener("click", exportPNG);
     els.exportSvg.addEventListener("click", exportSVG);

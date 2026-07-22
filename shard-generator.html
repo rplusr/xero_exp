@@ -159,9 +159,8 @@
   <div class="sg-intro">
     <h1 class="sg-title">Shard generator</h1>
     <p class="sg-body">
-      Generates a small cluster of overlapping, irregular shapes — like loose
-      sheets of paper laid over one another. Corners stay soft rather than
-      sharp, and no two sides match, so every export looks hand-arranged.
+      Fractures the frame into 1–5 shard-shaped pieces that sit flush beside
+      one another, edge to edge, like cracked glass — no overlaps, no gaps.
     </p>
   </div>
 
@@ -184,26 +183,6 @@
       </div>
 
       <div class="sg-field">
-        <label for="sg-size">Shard size <span id="sg-size-value"></span></label>
-        <input type="range" id="sg-size" min="20" max="55" step="1" value="38" />
-      </div>
-
-      <div class="sg-field">
-        <label for="sg-spread">Spread <span id="sg-spread-value"></span></label>
-        <input type="range" id="sg-spread" min="5" max="55" step="1" value="24" />
-      </div>
-
-      <div class="sg-field">
-        <label for="sg-roundness">Corner softness <span id="sg-roundness-value"></span></label>
-        <input type="range" id="sg-roundness" min="5" max="40" step="1" value="22" />
-      </div>
-
-      <div class="sg-field">
-        <label for="sg-irregularity">Edge unevenness <span id="sg-irregularity-value"></span></label>
-        <input type="range" id="sg-irregularity" min="5" max="45" step="1" value="28" />
-      </div>
-
-      <div class="sg-field">
         <label for="sg-palette">Colour palette</label>
         <select id="sg-palette">
           <option value="brand">Xero brand</option>
@@ -216,7 +195,7 @@
       <div class="sg-field sg-field-row">
         <div>
           <label for="sg-opacity">Opacity <span id="sg-opacity-value"></span></label>
-          <input type="range" id="sg-opacity" min="40" max="100" step="5" value="85" />
+          <input type="range" id="sg-opacity" min="40" max="100" step="5" value="100" />
         </div>
         <div>
           <label for="sg-bg">Background</label>
@@ -224,11 +203,15 @@
         </div>
       </div>
 
-      <div class="sg-field sg-field-inline">
-        <label><input type="checkbox" id="sg-shadow" checked /> Paper drop shadow</label>
-      </div>
-      <div class="sg-field sg-field-inline">
-        <label><input type="checkbox" id="sg-blend" checked /> Multiply overlaps</label>
+      <div class="sg-field sg-field-row">
+        <div>
+          <label for="sg-crack-width">Crack width <span id="sg-crack-width-value"></span></label>
+          <input type="range" id="sg-crack-width" min="0" max="12" step="1" value="3" />
+        </div>
+        <div>
+          <label for="sg-crack-color">Crack colour</label>
+          <input type="color" id="sg-crack-color" value="#ffffff" />
+        </div>
       </div>
 
       <button type="button" class="sg-btn sg-btn-primary" id="sg-shuffle">Shuffle shards</button>
