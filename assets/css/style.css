@@ -1105,6 +1105,347 @@ a { color: inherit; }
 }
 
 /* ---------------------------------------------------------------- */
+/* Typography — stroke offset generator                               */
+/* ---------------------------------------------------------------- */
+
+.tf-page {
+  background: var(--paper);
+  padding-bottom: var(--space-6);
+}
+
+.tf-intro {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: calc(var(--nav-margin) + var(--nav-height) + var(--space-5)) var(--space-6) 0;
+}
+
+.tf-title {
+  font-size: calc(var(--fs-title) * 0.75);
+  font-weight: var(--weight-bold);
+  color: var(--nav-text);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-3);
+}
+
+.tf-body {
+  max-width: 620px;
+  font-size: calc(var(--fs-body) * 0.75);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.tf-tool {
+  max-width: var(--max-width);
+  margin: var(--space-6) auto 0;
+  padding: 0 var(--space-6);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* control rail */
+
+.tf-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: var(--space-4);
+}
+
+.tf-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.tf-field-row {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.tf-field-row--tight { margin-top: calc(-1 * var(--space-2)); }
+.tf-field-row[hidden] { display: none; }
+
+.tf-label {
+  font-size: var(--fs-label);
+  font-weight: var(--weight-medium);
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tf-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.tf-value {
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--nav-text);
+}
+
+.tf-input,
+.tf-select {
+  width: 100%;
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  color: var(--nav-text);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: var(--space-2) var(--space-3);
+  outline: none;
+  transition: border-color var(--t-fast) var(--ease);
+}
+
+.tf-input {
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.tf-input:focus-visible,
+.tf-select:focus-visible {
+  border-color: var(--accent);
+}
+
+.tf-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--line);
+  border-radius: 2px;
+  outline: none;
+}
+
+.tf-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease);
+}
+
+.tf-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+.tf-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.tf-color {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+
+.tf-color::-webkit-color-swatch-wrapper { padding: 2px; }
+.tf-color::-webkit-color-swatch { border: none; border-radius: 6px; }
+.tf-color::-moz-color-swatch { border: none; border-radius: 6px; }
+
+.tf-color--wide { width: 100%; height: 33px; }
+
+.tf-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-small);
+  color: var(--nav-text);
+  cursor: pointer;
+}
+
+.tf-checkbox input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tf-checkbox-box {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper);
+  transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+
+.tf-checkbox-mark {
+  stroke-dasharray: 16;
+  stroke-dashoffset: 16;
+  color: var(--paper);
+  transition: stroke-dashoffset var(--t-default) var(--ease);
+}
+
+.tf-checkbox input:checked + .tf-checkbox-box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.tf-checkbox input:checked + .tf-checkbox-box .tf-checkbox-mark {
+  stroke-dashoffset: 0;
+}
+
+.tf-checkbox input:focus-visible + .tf-checkbox-box {
+  border-color: var(--accent);
+}
+
+.tf-swatch-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--line);
+}
+
+.tf-preset-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: var(--fs-label);
+  font-family: var(--font);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.tf-preset-btn:hover,
+.tf-preset-btn:focus-visible { text-decoration: underline; }
+
+.tf-swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tf-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tf-swatch-index {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+
+.tf-export-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.tf-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 36px;
+  background: var(--accent);
+  color: var(--paper);
+  border: none;
+  border-radius: 10px;
+  padding: 0 var(--space-3);
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: opacity var(--t-fast) var(--ease);
+}
+
+.tf-export-btn:hover,
+.tf-export-btn:focus-visible { opacity: 0.88; }
+
+.tf-export-note {
+  font-size: var(--fs-label);
+  color: var(--ink-muted);
+}
+
+/* canvas / plate */
+
+.tf-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.tf-canvas {
+  position: relative;
+  min-height: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-conic-gradient(var(--line) 0% 25%, transparent 0% 50%) 0 0 / 20px 20px,
+    var(--paper);
+  border: 1px dashed var(--ink-muted);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.tf-canvas[data-plate="paper"] { background: var(--paper); }
+.tf-canvas[data-plate="navy"] { background: var(--nav-text); }
+.tf-canvas[data-plate="custom"] { background: var(--tf-plate-custom, var(--paper)); }
+
+.tf-reg-mark {
+  position: absolute;
+  color: var(--ink-muted);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.tf-reg-mark--tl { top: var(--space-3); left: var(--space-3); }
+.tf-reg-mark--tr { top: var(--space-3); right: var(--space-3); }
+.tf-reg-mark--bl { bottom: var(--space-3); left: var(--space-3); }
+.tf-reg-mark--br { bottom: var(--space-3); right: var(--space-3); }
+
+.tf-svg {
+  display: block;
+  width: min(100%, 720px);
+  height: auto;
+  max-height: 70vh;
+}
+
+.tf-canvas-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-label);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+  padding: 0 var(--space-2);
+}
+
+/* ---------------------------------------------------------------- */
 /* Responsive                                                         */
 /* ---------------------------------------------------------------- */
 
@@ -1127,6 +1468,9 @@ a { color: inherit; }
   }
   .attribute-item:last-child { border-bottom: none; }
   .attribute-text { font-size: clamp(17px, 4.5vw, 20px); }
+  .tf-tool { grid-template-columns: 1fr; }
+  .tf-field-row { flex-direction: column; }
+  .tf-canvas { min-height: 380px; }
 }
 
 /* ---------------------------------------------------------------- */
@@ -1161,5 +1505,8 @@ a { color: inherit; }
   .attribute-tick svg path {
     transition: none;
     stroke-dashoffset: 0;
+  }
+  .tf-checkbox-mark, .tf-range::-webkit-slider-thumb, .tf-export-btn {
+    transition: none;
   }
 }
