@@ -130,38 +130,52 @@
     canvasH = parseInt(els.h.value, 10) || 1200;
   }
 
-  // some embedding contexts (e.g. a sandboxed preview iframe) ignore the
-  // <a download> attribute entirely, so detect that and fall back to
-  // opening the file in a new tab instead, where it can be saved manually
-  function isEmbedded() {
-    try {
-      return window.self !== window.top;
-    } catch (e) {
-      return true;
-    }
-  }
-
-  function triggerDownload(dataUrl, filename) {
-    if (isEmbedded()) {
-      window.open(dataUrl, "_blank");
-      return;
-    }
-    var a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  }
-
   function serializeStageSVG() {
     var svg = els.stage.querySelector("svg");
     return new XMLSerializer().serializeToString(svg);
   }
 
+  // downloads are unreliable inside a sandboxed preview iframe (the
+  // <a download> attribute and window.open popups can both be silently
+  // blocked), so exporting always opens an in-page modal instead: a real
+  // download link (works when the browser allows it) plus a visible
+  // preview/textarea the file can always be saved or copied from by hand
+  function openExportModal(kind, dataUrl, filename, svgText) {
+    els.exportHint.textContent =
+      kind === "svg"
+        ? "Use the download button, or select all and copy the code below into a .svg file."
+        : "Use the download button, or right-click the image and choose “Save image as…”.";
+    els.exportPreview.innerHTML = "";
+
+    if (kind === "png") {
+      var img = document.createElement("img");
+      img.src = dataUrl;
+      img.alt = filename;
+      els.exportPreview.appendChild(img);
+    } else {
+      var textarea = document.createElement("textarea");
+      textarea.readOnly = true;
+      textarea.value = svgText;
+      els.exportPreview.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+    }
+
+    els.exportDownload.href = dataUrl;
+    els.exportDownload.download = filename;
+    els.exportModal.classList.add("is-open");
+    els.exportModal.setAttribute("aria-hidden", "false");
+  }
+
+  function closeExportModal() {
+    els.exportModal.classList.remove("is-open");
+    els.exportModal.setAttribute("aria-hidden", "true");
+  }
+
   function exportSVG() {
-    var dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serializeStageSVG());
-    triggerDownload(dataUrl, "xero-shards-" + canvasW + "x" + canvasH + ".svg");
+    var svgText = serializeStageSVG();
+    var dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText);
+    openExportModal("svg", dataUrl, "xero-shards-" + canvasW + "x" + canvasH + ".svg", svgText);
   }
 
   function exportPNG() {
@@ -173,7 +187,7 @@
       canvas.height = canvasH;
       var ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, canvasW, canvasH);
-      triggerDownload(canvas.toDataURL("image/png"), "xero-shards-" + canvasW + "x" + canvasH + ".png");
+      openExportModal("png", canvas.toDataURL("image/png"), "xero-shards-" + canvasW + "x" + canvasH + ".png");
     };
     img.src = svgDataUrl;
   }
@@ -206,6 +220,11 @@
     els.exportSvg = $("sg-export-svg");
     els.stage = $("sg-stage");
     els.previewWrap = $("sg-preview-wrap");
+    els.exportModal = $("sg-export-modal");
+    els.exportClose = $("sg-export-close");
+    els.exportHint = $("sg-export-hint");
+    els.exportPreview = $("sg-export-preview");
+    els.exportDownload = $("sg-export-download");
 
     updateReadouts();
 
@@ -230,6 +249,13 @@
     els.shuffle.addEventListener("click", regenerate);
     els.exportPng.addEventListener("click", exportPNG);
     els.exportSvg.addEventListener("click", exportSVG);
+    els.exportClose.addEventListener("click", closeExportModal);
+    els.exportModal.addEventListener("click", function (e) {
+      if (e.target === els.exportModal) closeExportModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeExportModal();
+    });
     window.addEventListener("resize", render);
 
     readCanvasSize();
