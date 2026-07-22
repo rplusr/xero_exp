@@ -130,29 +130,42 @@
     canvasH = parseInt(els.h.value, 10) || 1200;
   }
 
-  function downloadBlob(blob, filename) {
-    var url = URL.createObjectURL(blob);
+  // some embedding contexts (e.g. a sandboxed preview iframe) ignore the
+  // <a download> attribute entirely, so detect that and fall back to
+  // opening the file in a new tab instead, where it can be saved manually
+  function isEmbedded() {
+    try {
+      return window.self !== window.top;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function triggerDownload(dataUrl, filename) {
+    if (isEmbedded()) {
+      window.open(dataUrl, "_blank");
+      return;
+    }
     var a = document.createElement("a");
-    a.href = url;
+    a.href = dataUrl;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function serializeStageSVG() {
+    var svg = els.stage.querySelector("svg");
+    return new XMLSerializer().serializeToString(svg);
   }
 
   function exportSVG() {
-    var svg = els.stage.querySelector("svg");
-    var serialized = new XMLSerializer().serializeToString(svg);
-    var blob = new Blob([serialized], { type: "image/svg+xml" });
-    downloadBlob(blob, "xero-shards-" + canvasW + "x" + canvasH + ".svg");
+    var dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serializeStageSVG());
+    triggerDownload(dataUrl, "xero-shards-" + canvasW + "x" + canvasH + ".svg");
   }
 
   function exportPNG() {
-    var svg = els.stage.querySelector("svg");
-    var serialized = new XMLSerializer().serializeToString(svg);
-    var svgBlob = new Blob([serialized], { type: "image/svg+xml" });
-    var url = URL.createObjectURL(svgBlob);
+    var svgDataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(serializeStageSVG());
     var img = new Image();
     img.onload = function () {
       var canvas = document.createElement("canvas");
@@ -160,12 +173,9 @@
       canvas.height = canvasH;
       var ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, canvasW, canvasH);
-      URL.revokeObjectURL(url);
-      canvas.toBlob(function (blob) {
-        downloadBlob(blob, "xero-shards-" + canvasW + "x" + canvasH + ".png");
-      }, "image/png");
+      triggerDownload(canvas.toDataURL("image/png"), "xero-shards-" + canvasW + "x" + canvasH + ".png");
     };
-    img.src = url;
+    img.src = svgDataUrl;
   }
 
   function updateReadouts() {
