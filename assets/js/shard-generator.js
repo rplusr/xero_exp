@@ -157,34 +157,12 @@
   function render() {
     var opacity = parseInt(els.opacity.value, 10) / 100;
     var bg = els.bg.value;
-    var crackWidth = parseInt(els.crackWidth.value, 10);
-    var crackColor = els.crackColor.value;
-    var shadow = els.shadow.checked;
 
     var svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("xmlns", SVG_NS);
     svg.setAttribute("width", canvasW);
     svg.setAttribute("height", canvasH);
     svg.setAttribute("viewBox", "0 0 " + canvasW + " " + canvasH);
-
-    if (shadow) {
-      var defs = document.createElementNS(SVG_NS, "defs");
-      var filter = document.createElementNS(SVG_NS, "filter");
-      filter.setAttribute("id", "sg-shadow-filter");
-      filter.setAttribute("x", "-50%");
-      filter.setAttribute("y", "-50%");
-      filter.setAttribute("width", "200%");
-      filter.setAttribute("height", "200%");
-      var dropShadow = document.createElementNS(SVG_NS, "feDropShadow");
-      dropShadow.setAttribute("dx", "0");
-      dropShadow.setAttribute("dy", fmt(Math.min(canvasW, canvasH) * 0.006));
-      dropShadow.setAttribute("stdDeviation", fmt(Math.min(canvasW, canvasH) * 0.006));
-      dropShadow.setAttribute("flood-color", "#000000");
-      dropShadow.setAttribute("flood-opacity", "0.25");
-      filter.appendChild(dropShadow);
-      defs.appendChild(filter);
-      svg.appendChild(defs);
-    }
 
     var bgRect = document.createElementNS(SVG_NS, "rect");
     bgRect.setAttribute("x", "0");
@@ -202,12 +180,6 @@
       path.setAttribute("d", shard.path);
       path.setAttribute("fill", shard.color);
       path.setAttribute("fill-opacity", opacity);
-      if (shadow) path.setAttribute("filter", "url(#sg-shadow-filter)");
-      if (crackWidth > 0) {
-        path.setAttribute("stroke", crackColor);
-        path.setAttribute("stroke-width", crackWidth);
-        path.setAttribute("stroke-linejoin", "round");
-      }
       group.appendChild(path);
     });
 
@@ -273,7 +245,6 @@
   function updateReadouts() {
     els.countValue.textContent = els.count.value;
     els.opacityValue.textContent = els.opacity.value + "%";
-    els.crackWidthValue.textContent = els.crackWidth.value + "px";
     els.overlapValue.textContent = els.overlap.value + "%";
   }
 
@@ -286,12 +257,8 @@
     els.opacity = $("sg-opacity");
     els.opacityValue = $("sg-opacity-value");
     els.bg = $("sg-bg");
-    els.crackWidth = $("sg-crack-width");
-    els.crackWidthValue = $("sg-crack-width-value");
-    els.crackColor = $("sg-crack-color");
     els.overlap = $("sg-overlap");
     els.overlapValue = $("sg-overlap-value");
-    els.shadow = $("sg-shadow");
     els.shuffle = $("sg-shuffle");
     els.exportPng = $("sg-export-png");
     els.exportSvg = $("sg-export-svg");
@@ -309,7 +276,6 @@
       updateReadouts();
       regenerate();
     });
-    els.shadow.addEventListener("change", render);
     [els.w, els.h].forEach(function (input) {
       input.addEventListener("change", function () {
         readCanvasSize();
@@ -320,11 +286,6 @@
       updateReadouts();
       render();
     });
-    els.crackWidth.addEventListener("input", function () {
-      updateReadouts();
-      render();
-    });
-    els.crackColor.addEventListener("input", render);
     els.bg.addEventListener("input", render);
     els.shuffle.addEventListener("click", regenerate);
     els.exportPng.addEventListener("click", exportPNG);
