@@ -55,11 +55,25 @@
     return result;
   }
 
-  // splits a convex polygon in two with a random straight line through
-  // its centroid, retrying with a new angle if the cut is degenerate
+  function boundingRadius(poly, center) {
+    var r = 0;
+    poly.forEach(function (p) { r = Math.max(r, Math.hypot(p.x - center.x, p.y - center.y)); });
+    return r;
+  }
+
+  // splits a convex polygon in two with a random straight line, pivoting
+  // off-centre so pieces come out uneven rather than evenly balanced,
+  // retrying with a new angle/pivot if the cut is degenerate
   function splitPolygon(poly) {
-    var pivot = polygonCentroid(poly);
-    for (var attempt = 0; attempt < 12; attempt++) {
+    var centroid = polygonCentroid(poly);
+    var jitterRadius = boundingRadius(poly, centroid) * 0.35;
+    for (var attempt = 0; attempt < 16; attempt++) {
+      var jitterAngle = rand(0, Math.PI * 2);
+      var jitterDist = rand(0, jitterRadius);
+      var pivot = {
+        x: centroid.x + Math.cos(jitterAngle) * jitterDist,
+        y: centroid.y + Math.sin(jitterAngle) * jitterDist
+      };
       var angle = rand(0, Math.PI);
       var normal = { x: -Math.sin(angle), y: Math.cos(angle) };
       var a = clipHalfPlane(poly, pivot, normal, true);
@@ -69,6 +83,28 @@
       }
     }
     return [poly];
+  }
+
+  // grows a polygon outward from its own centre so neighbouring shards
+  // spill over their shared edge, like overlapping corners of paper
+  function outsetPolygon(poly, amount) {
+    var centroid = polygonCentroid(poly);
+    return poly.map(function (p) {
+      return {
+        x: centroid.x + (p.x - centroid.x) * (1 + amount),
+        y: centroid.y + (p.y - centroid.y) * (1 + amount)
+      };
+    });
+  }
+
+  function shuffleArray(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
   }
 
   function fracture(count) {
@@ -107,13 +143,15 @@
   function generateShards() {
     var count = parseInt(els.count.value, 10);
     var paletteName = els.palette.value;
+    var overlap = parseInt(els.overlap.value, 10) / 100;
     var colors = PALETTES[paletteName].slice();
 
     var polys = fracture(count);
-    shards = polys.map(function (poly) {
+    shards = shuffleArray(polys.map(function (poly) {
       var color = colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] : PALETTES[paletteName][0];
-      return { path: polygonToPath(poly), color: color };
-    });
+      var outset = overlap > 0 ? outsetPolygon(poly, overlap * rand(0.6, 1)) : poly;
+      return { path: polygonToPath(outset), color: color };
+    }));
   }
 
   function render() {
@@ -121,12 +159,32 @@
     var bg = els.bg.value;
     var crackWidth = parseInt(els.crackWidth.value, 10);
     var crackColor = els.crackColor.value;
+    var shadow = els.shadow.checked;
 
     var svg = document.createElementNS(SVG_NS, "svg");
     svg.setAttribute("xmlns", SVG_NS);
     svg.setAttribute("width", canvasW);
     svg.setAttribute("height", canvasH);
     svg.setAttribute("viewBox", "0 0 " + canvasW + " " + canvasH);
+
+    if (shadow) {
+      var defs = document.createElementNS(SVG_NS, "defs");
+      var filter = document.createElementNS(SVG_NS, "filter");
+      filter.setAttribute("id", "sg-shadow-filter");
+      filter.setAttribute("x", "-50%");
+      filter.setAttribute("y", "-50%");
+      filter.setAttribute("width", "200%");
+      filter.setAttribute("height", "200%");
+      var dropShadow = document.createElementNS(SVG_NS, "feDropShadow");
+      dropShadow.setAttribute("dx", "0");
+      dropShadow.setAttribute("dy", fmt(Math.min(canvasW, canvasH) * 0.006));
+      dropShadow.setAttribute("stdDeviation", fmt(Math.min(canvasW, canvasH) * 0.006));
+      dropShadow.setAttribute("flood-color", "#000000");
+      dropShadow.setAttribute("flood-opacity", "0.25");
+      filter.appendChild(dropShadow);
+      defs.appendChild(filter);
+      svg.appendChild(defs);
+    }
 
     var bgRect = document.createElementNS(SVG_NS, "rect");
     bgRect.setAttribute("x", "0");
@@ -144,6 +202,7 @@
       path.setAttribute("d", shard.path);
       path.setAttribute("fill", shard.color);
       path.setAttribute("fill-opacity", opacity);
+      if (shadow) path.setAttribute("filter", "url(#sg-shadow-filter)");
       if (crackWidth > 0) {
         path.setAttribute("stroke", crackColor);
         path.setAttribute("stroke-width", crackWidth);
@@ -215,6 +274,7 @@
     els.countValue.textContent = els.count.value;
     els.opacityValue.textContent = els.opacity.value + "%";
     els.crackWidthValue.textContent = els.crackWidth.value + "px";
+    els.overlapValue.textContent = els.overlap.value + "%";
   }
 
   function init() {
@@ -229,6 +289,9 @@
     els.crackWidth = $("sg-crack-width");
     els.crackWidthValue = $("sg-crack-width-value");
     els.crackColor = $("sg-crack-color");
+    els.overlap = $("sg-overlap");
+    els.overlapValue = $("sg-overlap-value");
+    els.shadow = $("sg-shadow");
     els.shuffle = $("sg-shuffle");
     els.exportPng = $("sg-export-png");
     els.exportSvg = $("sg-export-svg");
@@ -242,6 +305,11 @@
       regenerate();
     });
     els.palette.addEventListener("change", regenerate);
+    els.overlap.addEventListener("input", function () {
+      updateReadouts();
+      regenerate();
+    });
+    els.shadow.addEventListener("change", render);
     [els.w, els.h].forEach(function (input) {
       input.addEventListener("change", function () {
         readCanvasSize();
