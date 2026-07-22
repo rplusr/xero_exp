@@ -1,0 +1,206 @@
+.pgg-page {
+  background: var(--paper);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: calc(var(--nav-margin) + var(--nav-height) + var(--space-4)) var(--space-4) var(--space-6);
+}
+
+.pgg-intro {
+  max-width: 720px;
+  margin-bottom: var(--space-5);
+}
+
+.pgg-title {
+  font-family: var(--font-condensed);
+  font-weight: var(--weight-bold);
+  font-size: var(--fs-title);
+  color: var(--nav-text);
+  margin: 0 0 var(--space-3);
+}
+
+.pgg-body {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.pgg-tool {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.pgg-controls {
+  background: var(--paper-deep);
+  border: 1px solid var(--line);
+  border-radius: var(--space-3);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  position: sticky;
+  top: calc(var(--nav-height) + var(--space-3));
+}
+
+.pgg-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.pgg-field label {
+  font-size: var(--fs-small);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+.pgg-field-row {
+  flex-direction: row;
+  gap: var(--space-3);
+}
+
+.pgg-field-row > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.pgg-field-inline label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: var(--weight-text);
+}
+
+.pgg-controls select,
+.pgg-controls input[type="number"] {
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.pgg-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.pgg-controls input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+.pgg-controls input[type="color"] {
+  width: 100%;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 2px;
+  background: var(--paper);
+}
+
+.pgg-dims-readout {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--ink-muted);
+}
+
+.pgg-btn {
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.pgg-btn:hover {
+  background: var(--paper-deep);
+}
+
+.pgg-btn-primary {
+  background: var(--nav-text);
+  color: var(--paper);
+  border-color: var(--nav-text);
+}
+
+.pgg-btn-primary:hover {
+  opacity: 0.9;
+  background: var(--nav-text);
+}
+
+.pgg-hint {
+  margin: 0;
+  font-size: var(--fs-label);
+  color: var(--ink-muted);
+}
+
+.pgg-export-group {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.pgg-export-group .pgg-btn {
+  flex: 1;
+}
+
+.pgg-preview-wrap {
+  width: 100%;
+  height: 70vh;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-conic-gradient(#f4f6f8 0% 25%, #ffffff 0% 50%) 50% / 24px 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--space-3);
+  overflow: hidden;
+}
+
+.pgg-stage {
+  position: relative;
+  transform-origin: center center;
+  box-shadow: 0 0 0 1px rgba(0, 8, 86, 0.08);
+  overflow: hidden;
+}
+
+.pgg-tile {
+  position: absolute;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.pgg-tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.pgg-tile:hover {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+@media (max-width: 860px) {
+  .pgg-tool {
+    grid-template-columns: 1fr;
+  }
+  .pgg-controls {
+    position: static;
+  }
+}
