@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Xero — Pattern Grid Generator</title>
+<title>Xero — Shard Generator</title>
 <link rel="stylesheet" href="assets/css/style.css" />
-<link rel="stylesheet" href="assets/css/pattern-grid.css" />
+<link rel="stylesheet" href="assets/css/shard-generator.css" />
 </head>
 <body>
 
@@ -86,7 +86,7 @@
     <a href="#" class="mega-row" data-scramble="Brand Archetype">Brand Archetype</a>
     <a href="#" class="mega-row" data-scramble="Brand Attributes">Brand Attributes</a>
     <a href="brand-values.html" class="mega-row" data-scramble="Brand Values">Brand Values</a>
-    <a href="pattern-grid-generator.html" class="mega-row" data-scramble="Pattern Grid Generator">Pattern Grid Generator</a>
+    <a href="shard-generator.html" class="mega-row" data-scramble="Shard Generator">Shard Generator</a>
   </div>
 </div>
 
@@ -147,7 +147,7 @@
             <li><a href="#" class="mobile-sublink" data-scramble="Brand Archetype">Brand Archetype</a></li>
             <li><a href="#" class="mobile-sublink" data-scramble="Brand Attributes">Brand Attributes</a></li>
             <li><a href="brand-values.html" class="mobile-sublink" data-scramble="Brand Values">Brand Values</a></li>
-            <li><a href="pattern-grid-generator.html" class="mobile-sublink" data-scramble="Pattern Grid Generator">Pattern Grid Generator</a></li>
+            <li><a href="shard-generator.html" class="mobile-sublink" data-scramble="Shard Generator">Shard Generator</a></li>
           </ul>
         </div>
       </li>
@@ -155,75 +155,97 @@
   </nav>
 </div>
 
-<main class="pgg-page">
-  <div class="pgg-intro">
-    <h1 class="pgg-title">Pattern grid generator</h1>
-    <p class="pgg-body">
-      Fill any frame with the brand pattern tiles, sized flush against one another with no
-      padding. Pick a canvas preset, adjust the tile scale and mix, then export a PNG or
-      vector SVG ready to drop into social or web.
+<main class="sg-page">
+  <div class="sg-intro">
+    <h1 class="sg-title">Shard generator</h1>
+    <p class="sg-body">
+      Generates a small cluster of overlapping, irregular shapes — like loose
+      sheets of paper laid over one another. Corners stay soft rather than
+      sharp, and no two sides match, so every export looks hand-arranged.
     </p>
   </div>
 
-  <div class="pgg-tool">
-    <aside class="pgg-controls">
-      <div class="pgg-field">
-        <label for="pgg-preset">Canvas size</label>
-        <select id="pgg-preset"></select>
+  <div class="sg-tool">
+    <aside class="sg-controls">
+      <div class="sg-field">
+        <label for="sg-count">Shards <span id="sg-count-value"></span></label>
+        <input type="range" id="sg-count" min="1" max="5" step="1" value="4" />
       </div>
 
-      <div class="pgg-field pgg-field-row">
+      <div class="sg-field sg-field-row">
         <div>
-          <label for="pgg-w">Width</label>
-          <input type="number" id="pgg-w" min="100" max="4000" value="1920" />
+          <label for="sg-w">Width</label>
+          <input type="number" id="sg-w" min="200" max="4000" value="1200" />
         </div>
         <div>
-          <label for="pgg-h">Height</label>
-          <input type="number" id="pgg-h" min="100" max="4000" value="1080" />
-        </div>
-      </div>
-      <p class="pgg-dims-readout" id="pgg-dims">1920 × 1080px</p>
-
-      <div class="pgg-field">
-        <label for="pgg-scale">Tile scale <span id="pgg-scale-value"></span></label>
-        <input type="range" id="pgg-scale" min="60" max="360" step="4" value="160" />
-      </div>
-
-      <div class="pgg-field">
-        <label for="pgg-wide-freq">Wide-tile mix <span id="pgg-wide-freq-value"></span></label>
-        <input type="range" id="pgg-wide-freq" min="0" max="100" step="5" value="45" />
-      </div>
-
-      <div class="pgg-field pgg-field-inline">
-        <label><input type="checkbox" id="pgg-rotate" checked /> Random rotation</label>
-      </div>
-      <div class="pgg-field pgg-field-inline">
-        <label><input type="checkbox" id="pgg-flip" checked /> Random mirroring</label>
-      </div>
-
-      <div class="pgg-field pgg-field-row">
-        <div>
-          <label for="pgg-bg">Backing colour</label>
-          <input type="color" id="pgg-bg" value="#ffffff" />
+          <label for="sg-h">Height</label>
+          <input type="number" id="sg-h" min="200" max="4000" value="1200" />
         </div>
       </div>
 
-      <button type="button" class="pgg-btn pgg-btn-primary" id="pgg-shuffle">Shuffle layout</button>
-      <p class="pgg-hint">Click any tile in the preview to reroll just that one.</p>
+      <div class="sg-field">
+        <label for="sg-size">Shard size <span id="sg-size-value"></span></label>
+        <input type="range" id="sg-size" min="20" max="55" step="1" value="38" />
+      </div>
 
-      <div class="pgg-export-group">
-        <button type="button" class="pgg-btn" id="pgg-export-png">Export PNG</button>
-        <button type="button" class="pgg-btn" id="pgg-export-svg">Export SVG</button>
+      <div class="sg-field">
+        <label for="sg-spread">Spread <span id="sg-spread-value"></span></label>
+        <input type="range" id="sg-spread" min="5" max="55" step="1" value="24" />
+      </div>
+
+      <div class="sg-field">
+        <label for="sg-roundness">Corner softness <span id="sg-roundness-value"></span></label>
+        <input type="range" id="sg-roundness" min="5" max="40" step="1" value="22" />
+      </div>
+
+      <div class="sg-field">
+        <label for="sg-irregularity">Edge unevenness <span id="sg-irregularity-value"></span></label>
+        <input type="range" id="sg-irregularity" min="5" max="45" step="1" value="28" />
+      </div>
+
+      <div class="sg-field">
+        <label for="sg-palette">Colour palette</label>
+        <select id="sg-palette">
+          <option value="brand">Xero brand</option>
+          <option value="paper">Kraft &amp; paper</option>
+          <option value="ink">Mono ink</option>
+          <option value="ocean">Ocean</option>
+        </select>
+      </div>
+
+      <div class="sg-field sg-field-row">
+        <div>
+          <label for="sg-opacity">Opacity <span id="sg-opacity-value"></span></label>
+          <input type="range" id="sg-opacity" min="40" max="100" step="5" value="85" />
+        </div>
+        <div>
+          <label for="sg-bg">Background</label>
+          <input type="color" id="sg-bg" value="#f4f6f8" />
+        </div>
+      </div>
+
+      <div class="sg-field sg-field-inline">
+        <label><input type="checkbox" id="sg-shadow" checked /> Paper drop shadow</label>
+      </div>
+      <div class="sg-field sg-field-inline">
+        <label><input type="checkbox" id="sg-blend" checked /> Multiply overlaps</label>
+      </div>
+
+      <button type="button" class="sg-btn sg-btn-primary" id="sg-shuffle">Shuffle shards</button>
+
+      <div class="sg-export-group">
+        <button type="button" class="sg-btn" id="sg-export-png">Export PNG</button>
+        <button type="button" class="sg-btn" id="sg-export-svg">Export SVG</button>
       </div>
     </aside>
 
-    <div class="pgg-preview-wrap" id="pgg-preview-wrap">
-      <div class="pgg-stage" id="pgg-stage"></div>
+    <div class="sg-preview-wrap" id="sg-preview-wrap">
+      <div class="sg-stage" id="sg-stage"></div>
     </div>
   </div>
 </main>
 
 <script src="assets/js/main.js"></script>
-<script src="assets/js/pattern-grid.js"></script>
+<script src="assets/js/shard-generator.js"></script>
 </body>
 </html>
