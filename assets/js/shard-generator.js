@@ -50,6 +50,35 @@
     return d;
   }
 
+  // like Post-it notes dropped from a height: each shard claims its own
+  // spot and only slightly overlaps its neighbours, so this hunts for a
+  // centre far enough from every already-placed shard, falling back to
+  // the least-overlapping spot tried if the frame is too crowded to fit
+  var MIN_SEPARATION = 0.85; // fraction of combined radii kept clear
+
+  function findCenter(radius, bounds, placed) {
+    var best = null;
+    var bestScore = -Infinity;
+    for (var attempt = 0; attempt < 60; attempt++) {
+      var cx = rand(bounds.minX, bounds.maxX);
+      var cy = rand(bounds.minY, bounds.maxY);
+      var worstSlack = Infinity;
+      for (var i = 0; i < placed.length; i++) {
+        var p = placed[i];
+        var d = Math.hypot(cx - p.x, cy - p.y);
+        var required = (radius + p.r) * MIN_SEPARATION;
+        worstSlack = Math.min(worstSlack, d - required);
+      }
+      if (placed.length === 0) worstSlack = Infinity;
+      if (worstSlack >= 0) return { x: cx, y: cy };
+      if (worstSlack > bestScore) {
+        bestScore = worstSlack;
+        best = { x: cx, y: cy };
+      }
+    }
+    return best;
+  }
+
   function generateShards() {
     var count = parseInt(els.count.value, 10);
     var paletteName = els.palette.value;
@@ -65,15 +94,21 @@
     var marginX = canvasW * spreadPct;
     var marginY = canvasH * spreadPct;
 
+    var placedCenters = [];
     var placed = [];
     for (var i = 0; i < count; i++) {
       var radius = minDim * sizePct * rand(0.7, 1.3);
       var maxExtent = radius * (1 + irregularity);
-      var cx = rand(maxExtent - marginX, canvasW - maxExtent + marginX);
-      var cy = rand(maxExtent - marginY, canvasH - maxExtent + marginY);
+      var bounds = {
+        minX: maxExtent - marginX, maxX: canvasW - maxExtent + marginX,
+        minY: maxExtent - marginY, maxY: canvasH - maxExtent + marginY
+      };
+      var center = findCenter(radius, bounds, placedCenters);
+      placedCenters.push({ x: center.x, y: center.y, r: radius });
+
       var vertexCount = Math.floor(rand(4, 8));
       var rotation = rand(0, Math.PI * 2);
-      var poly = irregularPolygon(cx, cy, radius, vertexCount, irregularity, rotation);
+      var poly = irregularPolygon(center.x, center.y, radius, vertexCount, irregularity, rotation);
       var color = colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] : pick(PALETTES[paletteName]);
       placed.push({ path: polygonToPath(poly), color: color });
     }
