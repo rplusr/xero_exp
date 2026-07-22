@@ -143,10 +143,16 @@
   flex: 1;
 }
 
-.sg-preview-wrap {
+.sg-preview-outer {
   width: 100%;
   height: 70vh;
   min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sg-preview-wrap {
   display: flex;
   align-items: center;
   justify-content: center;

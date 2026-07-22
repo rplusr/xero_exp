@@ -159,9 +159,9 @@
   <div class="sg-intro">
     <h1 class="sg-title">Shard generator</h1>
     <p class="sg-body">
-      Scatters 1–5 irregular shard shapes across the frame, each claiming
-      its own space with only a slight overlap here and there — like
-      Post-it notes dropped from a height, not a stack of paper.
+      Arranges 1–5 irregular shard shapes into a collage: each piece sits
+      alongside the last, touching or just slightly overlapping, rather
+      than scattered apart or stacked on top of one another.
     </p>
   </div>
 
@@ -206,7 +206,7 @@
 
       <div class="sg-field">
         <label for="sg-size">Shard size <span id="sg-size-value"></span></label>
-        <input type="range" id="sg-size" min="10" max="32" step="1" value="18" />
+        <input type="range" id="sg-size" min="12" max="40" step="1" value="26" />
       </div>
 
       <div class="sg-field">
@@ -227,8 +227,10 @@
       </div>
     </aside>
 
-    <div class="sg-preview-wrap" id="sg-preview-wrap">
-      <div class="sg-stage" id="sg-stage"></div>
+    <div class="sg-preview-outer" id="sg-preview-outer">
+      <div class="sg-preview-wrap" id="sg-preview-wrap">
+        <div class="sg-stage" id="sg-stage"></div>
+      </div>
     </div>
   </div>
 </main>

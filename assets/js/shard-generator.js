@@ -50,18 +50,34 @@
     return d;
   }
 
-  // like Post-it notes dropped from a height: each shard claims its own
-  // spot and only slightly overlaps its neighbours, so this hunts for a
-  // centre far enough from every already-placed shard, falling back to
-  // the least-overlapping spot tried if the frame is too crowded to fit
-  var MIN_SEPARATION = 0.85; // fraction of combined radii kept clear
+  function clamp(v, min, max) {
+    return Math.max(min, Math.min(max, v));
+  }
 
-  function findCenter(radius, bounds, placed) {
+  // a collage, not a scatter or a stack: each new shard attaches next to
+  // one already placed - at roughly touching distance, sometimes a hair
+  // of overlap, sometimes a sliver of a gap - so the set reads as pieces
+  // laid out alongside one another rather than dropped independently
+  var MIN_SEPARATION = 0.7; // hard floor: never let two shards overlap past this
+  var ATTACH_MIN = 0.86; // typical attach distance range, as a fraction
+  var ATTACH_MAX = 1.04; // of the two shards' combined radii
+
+  function findAdjacentCenter(radius, bounds, placed) {
+    if (placed.length === 0) {
+      var cx0 = rand(0.42, 0.58) * (bounds.minX + bounds.maxX);
+      var cy0 = rand(0.42, 0.58) * (bounds.minY + bounds.maxY);
+      return { x: clamp(cx0, bounds.minX, bounds.maxX), y: clamp(cy0, bounds.minY, bounds.maxY) };
+    }
+
     var best = null;
     var bestScore = -Infinity;
     for (var attempt = 0; attempt < 60; attempt++) {
-      var cx = rand(bounds.minX, bounds.maxX);
-      var cy = rand(bounds.minY, bounds.maxY);
+      var anchor = placed[Math.floor(Math.random() * placed.length)];
+      var angle = rand(0, Math.PI * 2);
+      var dist = (anchor.r + radius) * rand(ATTACH_MIN, ATTACH_MAX);
+      var cx = clamp(anchor.x + Math.cos(angle) * dist, bounds.minX, bounds.maxX);
+      var cy = clamp(anchor.y + Math.sin(angle) * dist, bounds.minY, bounds.maxY);
+
       var worstSlack = Infinity;
       for (var i = 0; i < placed.length; i++) {
         var p = placed[i];
@@ -69,7 +85,6 @@
         var required = (radius + p.r) * MIN_SEPARATION;
         worstSlack = Math.min(worstSlack, d - required);
       }
-      if (placed.length === 0) worstSlack = Infinity;
       if (worstSlack >= 0) return { x: cx, y: cy };
       if (worstSlack > bestScore) {
         bestScore = worstSlack;
@@ -103,7 +118,7 @@
         minX: maxExtent - marginX, maxX: canvasW - maxExtent + marginX,
         minY: maxExtent - marginY, maxY: canvasH - maxExtent + marginY
       };
-      var center = findCenter(radius, bounds, placedCenters);
+      var center = findAdjacentCenter(radius, bounds, placedCenters);
       placedCenters.push({ x: center.x, y: center.y, r: radius });
 
       var vertexCount = Math.floor(rand(4, 8));
@@ -148,8 +163,13 @@
     stage.innerHTML = "";
     stage.appendChild(svg);
 
-    var wrap = els.previewWrap;
-    var scale = Math.min(wrap.clientWidth / canvasW, wrap.clientHeight / canvasH, 1);
+    // size the checkered wrap to the canvas's own aspect ratio within the
+    // outer box, so it hugs the artwork instead of leaving a mismatched
+    // letterboxed strip when the canvas isn't the same shape as the outer box
+    var outer = els.previewOuter;
+    var scale = Math.min(outer.clientWidth / canvasW, outer.clientHeight / canvasH, 1);
+    els.previewWrap.style.width = fmt(canvasW * scale) + "px";
+    els.previewWrap.style.height = fmt(canvasH * scale) + "px";
     stage.style.width = canvasW + "px";
     stage.style.height = canvasH + "px";
     stage.style.transform = "scale(" + scale + ")";
@@ -255,6 +275,7 @@
     els.exportSvg = $("sg-export-svg");
     els.stage = $("sg-stage");
     els.previewWrap = $("sg-preview-wrap");
+    els.previewOuter = $("sg-preview-outer");
     els.exportModal = $("sg-export-modal");
     els.exportClose = $("sg-export-close");
     els.exportHint = $("sg-export-hint");
