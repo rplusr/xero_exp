@@ -190,16 +190,30 @@
     return new XMLSerializer().serializeToString(svg);
   }
 
+  // some embedding contexts (e.g. a sandboxed preview iframe) ignore the
+  // <a download> attribute entirely, so the file just opens in place of
+  // navigating - offering it as a new tab instead is more likely to work
+  function isEmbedded() {
+    try {
+      return window.self !== window.top;
+    } catch (e) {
+      return true;
+    }
+  }
+
   // downloads are unreliable inside a sandboxed preview iframe (the
   // <a download> attribute and window.open popups can both be silently
   // blocked), so exporting always opens an in-page modal instead: a real
   // download link (works when the browser allows it) plus a visible
   // preview/textarea the file can always be saved or copied from by hand
   function openExportModal(kind, dataUrl, filename, svgText) {
+    var embedded = isEmbedded();
+    els.exportDownload.textContent = embedded ? "Open in new tab" : "Download file";
     els.exportHint.textContent =
-      kind === "svg"
-        ? "Use the download button, or select all and copy the code below into a .svg file."
-        : "Use the download button, or right-click the image and choose “Save image as…”.";
+      (kind === "svg"
+        ? "Select all and copy the code below into a .svg file"
+        : "Right-click the image and choose “Save image as…”") +
+      (embedded ? ", or use the button above." : ", or use the download button.");
     els.exportPreview.innerHTML = "";
 
     if (kind === "png") {
@@ -305,6 +319,12 @@
     els.shuffle.addEventListener("click", regenerate);
     els.exportPng.addEventListener("click", exportPNG);
     els.exportSvg.addEventListener("click", exportSVG);
+    els.exportDownload.addEventListener("click", function (e) {
+      if (isEmbedded()) {
+        e.preventDefault();
+        window.open(els.exportDownload.href, "_blank");
+      }
+    });
     els.exportClose.addEventListener("click", closeExportModal);
     els.exportModal.addEventListener("click", function (e) {
       if (e.target === els.exportModal) closeExportModal();
