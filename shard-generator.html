@@ -159,9 +159,9 @@
   <div class="sg-intro">
     <h1 class="sg-title">Shard generator</h1>
     <p class="sg-body">
-      Fractures the frame into 1–5 shard-shaped pieces, each nudged to spill
-      slightly over its neighbours — like loose sheets of paper laid on top
-      of one another, corners overlapping.
+      Scatters 1–5 irregular shard shapes across the frame — independently
+      sized, rotated and placed, free to run off any edge, so the
+      composition reads as loosely torn paper rather than a tidy grid.
     </p>
   </div>
 
@@ -205,8 +205,18 @@
       </div>
 
       <div class="sg-field">
-        <label for="sg-overlap">Overlap <span id="sg-overlap-value"></span></label>
-        <input type="range" id="sg-overlap" min="0" max="18" step="1" value="7" />
+        <label for="sg-size">Shard size <span id="sg-size-value"></span></label>
+        <input type="range" id="sg-size" min="25" max="70" step="1" value="45" />
+      </div>
+
+      <div class="sg-field">
+        <label for="sg-spread">Bleed off edges <span id="sg-spread-value"></span></label>
+        <input type="range" id="sg-spread" min="0" max="45" step="1" value="20" />
+      </div>
+
+      <div class="sg-field">
+        <label for="sg-irregularity">Irregularity <span id="sg-irregularity-value"></span></label>
+        <input type="range" id="sg-irregularity" min="10" max="60" step="1" value="38" />
       </div>
 
       <button type="button" class="sg-btn sg-btn-primary" id="sg-shuffle">Shuffle shards</button>

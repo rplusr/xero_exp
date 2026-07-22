@@ -14,88 +14,8 @@
 
   function $(id) { return document.getElementById(id); }
   function rand(min, max) { return min + Math.random() * (max - min); }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function fmt(n) { return Math.round(n * 100) / 100; }
-  function sub(a, b) { return { x: a.x - b.x, y: a.y - b.y }; }
-  function dot(a, b) { return a.x * b.x + a.y * b.y; }
-  function lerp(a, b, t) { return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t }; }
-
-  function polygonArea(poly) {
-    var area = 0;
-    for (var i = 0; i < poly.length; i++) {
-      var a = poly[i], b = poly[(i + 1) % poly.length];
-      area += a.x * b.y - b.x * a.y;
-    }
-    return Math.abs(area / 2);
-  }
-
-  function polygonCentroid(poly) {
-    var cx = 0, cy = 0;
-    poly.forEach(function (p) { cx += p.x; cy += p.y; });
-    return { x: cx / poly.length, y: cy / poly.length };
-  }
-
-  // Sutherland-Hodgman half-plane clip: keeps the side of the line
-  // through `pivot` (with the given normal) that matches `keepPositive`
-  function clipHalfPlane(poly, pivot, normal, keepPositive) {
-    var result = [];
-    var n = poly.length;
-    for (var i = 0; i < n; i++) {
-      var curr = poly[i];
-      var next = poly[(i + 1) % n];
-      var sideCurr = dot(sub(curr, pivot), normal);
-      var sideNext = dot(sub(next, pivot), normal);
-      var currIn = keepPositive ? sideCurr >= 0 : sideCurr <= 0;
-      var nextIn = keepPositive ? sideNext >= 0 : sideNext <= 0;
-      if (currIn) result.push(curr);
-      if (currIn !== nextIn && sideCurr !== sideNext) {
-        var t = sideCurr / (sideCurr - sideNext);
-        result.push(lerp(curr, next, t));
-      }
-    }
-    return result;
-  }
-
-  function boundingRadius(poly, center) {
-    var r = 0;
-    poly.forEach(function (p) { r = Math.max(r, Math.hypot(p.x - center.x, p.y - center.y)); });
-    return r;
-  }
-
-  // splits a convex polygon in two with a random straight line, pivoting
-  // off-centre so pieces come out uneven rather than evenly balanced,
-  // retrying with a new angle/pivot if the cut is degenerate
-  function splitPolygon(poly) {
-    var centroid = polygonCentroid(poly);
-    var jitterRadius = boundingRadius(poly, centroid) * 0.35;
-    for (var attempt = 0; attempt < 16; attempt++) {
-      var jitterAngle = rand(0, Math.PI * 2);
-      var jitterDist = rand(0, jitterRadius);
-      var pivot = {
-        x: centroid.x + Math.cos(jitterAngle) * jitterDist,
-        y: centroid.y + Math.sin(jitterAngle) * jitterDist
-      };
-      var angle = rand(0, Math.PI);
-      var normal = { x: -Math.sin(angle), y: Math.cos(angle) };
-      var a = clipHalfPlane(poly, pivot, normal, true);
-      var b = clipHalfPlane(poly, pivot, normal, false);
-      if (a.length >= 3 && b.length >= 3 && polygonArea(a) > 1 && polygonArea(b) > 1) {
-        return [a, b];
-      }
-    }
-    return [poly];
-  }
-
-  // grows a polygon outward from its own centre so neighbouring shards
-  // spill over their shared edge, like overlapping corners of paper
-  function outsetPolygon(poly, amount) {
-    var centroid = polygonCentroid(poly);
-    return poly.map(function (p) {
-      return {
-        x: centroid.x + (p.x - centroid.x) * (1 + amount),
-        y: centroid.y + (p.y - centroid.y) * (1 + amount)
-      };
-    });
-  }
 
   function shuffleArray(arr) {
     for (var i = arr.length - 1; i > 0; i--) {
@@ -107,28 +27,18 @@
     return arr;
   }
 
-  function fracture(count) {
-    var polys = [
-      [
-        { x: 0, y: 0 },
-        { x: canvasW, y: 0 },
-        { x: canvasW, y: canvasH },
-        { x: 0, y: canvasH }
-      ]
-    ];
-
-    while (polys.length < count) {
-      var largestIdx = 0;
-      var largestArea = -1;
-      for (var i = 0; i < polys.length; i++) {
-        var a = polygonArea(polys[i]);
-        if (a > largestArea) { largestArea = a; largestIdx = i; }
-      }
-      var pieces = splitPolygon(polys[largestIdx]);
-      if (pieces.length === 1) break; // couldn't find a valid cut, stop early
-      polys.splice(largestIdx, 1, pieces[0], pieces[1]);
+  // an irregular polygon: vertex count, radius and angle all jitter, so
+  // no two shards share the same silhouette and none reads as a regular
+  // shape - a rough torn-paper piece rather than a clean geometric one
+  function irregularPolygon(cx, cy, avgRadius, vertexCount, irregularity, rotation) {
+    var points = [];
+    var angleStep = (Math.PI * 2) / vertexCount;
+    for (var i = 0; i < vertexCount; i++) {
+      var angle = rotation + i * angleStep + rand(-angleStep * 0.4, angleStep * 0.4);
+      var radius = avgRadius * (1 + rand(-irregularity, irregularity));
+      points.push({ x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) });
     }
-    return polys;
+    return points;
   }
 
   function polygonToPath(poly) {
@@ -143,15 +53,30 @@
   function generateShards() {
     var count = parseInt(els.count.value, 10);
     var paletteName = els.palette.value;
-    var overlap = parseInt(els.overlap.value, 10) / 100;
+    var sizePct = parseInt(els.size.value, 10) / 100;
+    var spreadPct = parseInt(els.spread.value, 10) / 100;
+    var irregularity = parseInt(els.irregularity.value, 10) / 100;
     var colors = PALETTES[paletteName].slice();
 
-    var polys = fracture(count);
-    shards = shuffleArray(polys.map(function (poly) {
-      var color = colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] : PALETTES[paletteName][0];
-      var outset = overlap > 0 ? outsetPolygon(poly, overlap * rand(0.6, 1)) : poly;
-      return { path: polygonToPath(outset), color: color };
-    }));
+    var minDim = Math.min(canvasW, canvasH);
+    // shards are placed anywhere across a region larger than the frame
+    // itself, so pieces can run off any edge rather than all meeting
+    // neatly inside a bounded square
+    var marginX = canvasW * spreadPct;
+    var marginY = canvasH * spreadPct;
+
+    var placed = [];
+    for (var i = 0; i < count; i++) {
+      var cx = rand(-marginX, canvasW + marginX);
+      var cy = rand(-marginY, canvasH + marginY);
+      var radius = minDim * sizePct * rand(0.7, 1.3);
+      var vertexCount = Math.floor(rand(4, 8));
+      var rotation = rand(0, Math.PI * 2);
+      var poly = irregularPolygon(cx, cy, radius, vertexCount, irregularity, rotation);
+      var color = colors.length ? colors.splice(Math.floor(Math.random() * colors.length), 1)[0] : pick(PALETTES[paletteName]);
+      placed.push({ path: polygonToPath(poly), color: color });
+    }
+    shards = shuffleArray(placed);
   }
 
   function render() {
@@ -245,7 +170,9 @@
   function updateReadouts() {
     els.countValue.textContent = els.count.value;
     els.opacityValue.textContent = els.opacity.value + "%";
-    els.overlapValue.textContent = els.overlap.value + "%";
+    els.sizeValue.textContent = els.size.value + "%";
+    els.spreadValue.textContent = els.spread.value + "%";
+    els.irregularityValue.textContent = els.irregularity.value + "%";
   }
 
   function init() {
@@ -257,8 +184,12 @@
     els.opacity = $("sg-opacity");
     els.opacityValue = $("sg-opacity-value");
     els.bg = $("sg-bg");
-    els.overlap = $("sg-overlap");
-    els.overlapValue = $("sg-overlap-value");
+    els.size = $("sg-size");
+    els.sizeValue = $("sg-size-value");
+    els.spread = $("sg-spread");
+    els.spreadValue = $("sg-spread-value");
+    els.irregularity = $("sg-irregularity");
+    els.irregularityValue = $("sg-irregularity-value");
     els.shuffle = $("sg-shuffle");
     els.exportPng = $("sg-export-png");
     els.exportSvg = $("sg-export-svg");
@@ -267,15 +198,13 @@
 
     updateReadouts();
 
-    els.count.addEventListener("input", function () {
-      updateReadouts();
-      regenerate();
+    [els.count, els.size, els.spread, els.irregularity].forEach(function (input) {
+      input.addEventListener("input", function () {
+        updateReadouts();
+        regenerate();
+      });
     });
     els.palette.addEventListener("change", regenerate);
-    els.overlap.addEventListener("input", function () {
-      updateReadouts();
-      regenerate();
-    });
     [els.w, els.h].forEach(function (input) {
       input.addEventListener("change", function () {
         readCanvasSize();
