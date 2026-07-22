@@ -59,17 +59,18 @@
     var colors = PALETTES[paletteName].slice();
 
     var minDim = Math.min(canvasW, canvasH);
-    // shards are placed anywhere across a region larger than the frame
-    // itself, so pieces can run off any edge rather than all meeting
-    // neatly inside a bounded square
+    // at spread 0 every shard is kept fully on-canvas (centre clamped by
+    // its own worst-case extent); the spread slider then allows the
+    // centre to wander past that safe zone so pieces can run off an edge
     var marginX = canvasW * spreadPct;
     var marginY = canvasH * spreadPct;
 
     var placed = [];
     for (var i = 0; i < count; i++) {
-      var cx = rand(-marginX, canvasW + marginX);
-      var cy = rand(-marginY, canvasH + marginY);
       var radius = minDim * sizePct * rand(0.7, 1.3);
+      var maxExtent = radius * (1 + irregularity);
+      var cx = rand(maxExtent - marginX, canvasW - maxExtent + marginX);
+      var cy = rand(maxExtent - marginY, canvasH - maxExtent + marginY);
       var vertexCount = Math.floor(rand(4, 8));
       var rotation = rand(0, Math.PI * 2);
       var poly = irregularPolygon(cx, cy, radius, vertexCount, irregularity, rotation);
