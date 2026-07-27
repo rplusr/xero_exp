@@ -4,236 +4,378 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Radio Wave Generator — Mono SVG Export</title>
-<style>
-  :root{
-    --bg:#ffffff;
-    --panel:#f4f4f4;
-    --line:#d9d9d9;
-    --ink:#0a0a0a;
-    --sub:#6b6b6b;
-    --accent:#0a0a0a;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
-  body{display:flex;min-height:100vh;}
-
-  /* ---- layout ---- */
-  .panel{
-    width:360px;flex:0 0 360px;
-    border-right:1px solid var(--line);
-    padding:20px 20px 60px;
-    overflow-y:auto;
-    max-height:100vh;
-    background:var(--panel);
-  }
-  .stage{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:16px;
-    padding:32px;
-    background:
-      linear-gradient(45deg,#eee 25%,transparent 25%) -10px 0/20px 20px,
-      linear-gradient(-45deg,#eee 25%,transparent 25%) -10px 0/20px 20px,
-      linear-gradient(45deg,transparent 75%,#eee 75%) -10px 0/20px 20px,
-      linear-gradient(-45deg,transparent 75%,#eee 75%) -10px 0/20px 20px,
-      #fff;
-  }
-  .stage.bg-white{background:#ffffff;}
-  .stage.bg-black{background:#0a0a0a;}
-  .canvas-wrap{
-    box-shadow:0 0 0 1px var(--line);
-    background:transparent;
-    line-height:0;
-  }
-  .stage.bg-black .canvas-wrap{box-shadow:0 0 0 1px #333;}
-
-  h1{font-size:15px;font-weight:700;letter-spacing:.02em;margin:0 0 2px;}
-  .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--sub);margin:0 0 18px;}
-
-  fieldset{border:none;padding:0;margin:0 0 20px;}
-  legend{
-    font-size:10px;text-transform:uppercase;letter-spacing:.1em;
-    color:#fff;background:var(--ink);padding:3px 8px;margin:0 0 12px;
-  }
-  .sub-legend{
-    font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
-    color:var(--sub);margin:14px 0 8px;border-top:1px solid var(--line);padding-top:12px;
-  }
-  .row{margin-bottom:12px;}
-  .row label{
-    display:flex;justify-content:space-between;align-items:baseline;
-    font-size:12px;margin-bottom:5px;
-  }
-  .row label span.val{font-variant-numeric:tabular-nums;color:var(--sub);font-size:11px;}
-  input[type=range]{
-    width:100%;accent-color:var(--accent);height:16px;
-  }
-  input[type=number]{
-    width:72px;font-size:12px;padding:3px 5px;border:1px solid var(--line);
-    background:#fff;color:var(--ink);border-radius:2px;
-  }
-  select{
-    width:100%;font-size:12px;padding:5px 6px;border:1px solid var(--line);
-    background:#fff;color:var(--ink);border-radius:2px;
-  }
-  .rangeRow{display:flex;align-items:center;gap:8px;}
-  .rangeRow input[type=range]{flex:1;}
-
-  .btnrow{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
-  button{
-    font-size:12px;font-weight:600;letter-spacing:.02em;
-    background:var(--ink);color:#fff;border:1px solid var(--ink);
-    padding:9px 14px;border-radius:2px;cursor:pointer;
-  }
-  button.secondary{background:#fff;color:var(--ink);}
-  button:hover{opacity:.85;}
-  button:active{opacity:.65;}
-
-  .toggles{display:flex;gap:6px;}
-  .toggles button{flex:1;padding:7px 6px;font-size:11px;}
-  .toggles button.active{outline:2px solid #4a90e2;outline-offset:-2px;}
-
-  .hint{font-size:10.5px;color:var(--sub);margin-top:4px;line-height:1.4;}
-
-  .stagebar{display:flex;gap:8px;align-items:center;}
-  .stagebar select{width:auto;}
-
-  textarea#svgOut{
-    width:800px;max-width:90vw;height:120px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:10.5px;padding:8px;border:1px solid var(--line);border-radius:2px;
-    display:none;
-  }
-  .footer-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;}
-  .meta{font-size:11px;color:var(--sub);}
-</style>
+<style>html,body{margin:0;padding:0;}</style>
 </head>
 <body>
+<style>
+  :root{
+    --ground:#eceded;
+    --panel:#f7f8f8;
+    --stage:#e4e6e6;
+    --ink:#14181a;
+    --ink-2:#4a5356;
+    --ink-3:#788386;
+    --rule:#d2d6d7;
+    --rule-2:#c0c5c7;
+    --field:#ffffff;
+    --signal:#b4732a;
+    --signal-soft:rgba(180,115,42,.16);
+    --checker:#d9dcdc;
 
-<div class="panel">
-  <h1>Radio Wave Generator</h1>
-  <p class="eyebrow">Generative Mono · SVG Export</p>
+    --f-ui:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --f-data:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0e1113;
+      --panel:#15191b;
+      --stage:#0a0c0d;
+      --ink:#e8ebeb;
+      --ink-2:#98a2a5;
+      --ink-3:#6b7679;
+      --rule:#252b2e;
+      --rule-2:#333b3e;
+      --field:#1c2124;
+      --signal:#d9973f;
+      --signal-soft:rgba(217,151,63,.18);
+      --checker:#1a1e20;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0e1113;
+    --panel:#15191b;
+    --stage:#0a0c0d;
+    --ink:#e8ebeb;
+    --ink-2:#98a2a5;
+    --ink-3:#6b7679;
+    --rule:#252b2e;
+    --rule-2:#333b3e;
+    --field:#1c2124;
+    --signal:#d9973f;
+    --signal-soft:rgba(217,151,63,.18);
+    --checker:#1a1e20;
+  }
+  :root[data-theme="light"]{
+    --ground:#eceded;
+    --panel:#f7f8f8;
+    --stage:#e4e6e6;
+    --ink:#14181a;
+    --ink-2:#4a5356;
+    --ink-3:#788386;
+    --rule:#d2d6d7;
+    --rule-2:#c0c5c7;
+    --field:#ffffff;
+    --signal:#b4732a;
+    --signal-soft:rgba(180,115,42,.16);
+    --checker:#d9dcdc;
+  }
 
-  <fieldset>
-    <legend>FX &gt; Radio Waves</legend>
-    <div class="row">
-      <label>Render Quality <span class="val" id="v-quality">10</span></label>
-      <div class="rangeRow">
+  *{box-sizing:border-box;}
+  .rw{
+    font-family:var(--f-ui);
+    color:var(--ink);
+    background:var(--ground);
+    display:grid;
+    grid-template-columns:336px minmax(0,1fr);
+    height:100dvh;
+    min-height:520px;
+  }
+
+  /* ---------- console ---------- */
+  .console{
+    background:var(--panel);
+    border-right:1px solid var(--rule);
+    overflow-y:auto;
+    padding:22px 22px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+  }
+  .masthead{display:flex;flex-direction:column;gap:7px;}
+  .masthead h1{
+    margin:0;font-size:19px;line-height:1.05;font-weight:700;
+    letter-spacing:-.035em;text-wrap:balance;
+  }
+  .masthead p{
+    margin:0;font-family:var(--f-data);font-size:10px;line-height:1.5;
+    letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+  }
+
+  .fx{display:flex;flex-direction:column;gap:14px;}
+  .fx-head{
+    display:flex;align-items:baseline;gap:8px;
+    border-bottom:1px solid var(--rule-2);padding-bottom:7px;
+  }
+  .fx-head .fx-kind{
+    font-family:var(--f-data);font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+  .fx-head h2{
+    margin:0;font-size:12.5px;font-weight:700;letter-spacing:-.01em;
+  }
+  .group{
+    font-family:var(--f-data);font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-3);
+    margin-top:4px;
+  }
+
+  .ctrl{display:flex;flex-direction:column;gap:6px;}
+  .ctrl-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .ctrl-top label{font-size:12.5px;letter-spacing:-.005em;color:var(--ink);}
+  .readout{
+    font-family:var(--f-data);font-size:11px;font-variant-numeric:tabular-nums;
+    color:var(--signal);letter-spacing:0;
+  }
+  .note{
+    font-size:11px;line-height:1.45;color:var(--ink-3);margin:0;
+  }
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    width:100%;height:18px;background:transparent;margin:0;cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:2px;background:var(--rule-2);border-radius:0;
+  }
+  input[type=range]::-moz-range-track{
+    height:2px;background:var(--rule-2);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:12px;height:12px;margin-top:-5px;border-radius:50%;
+    background:var(--signal);border:none;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:12px;height:12px;border-radius:50%;
+    background:var(--signal);border:none;
+  }
+  input[type=range]:focus-visible{outline:2px solid var(--signal);outline-offset:3px;}
+
+  select{
+    width:100%;font-family:var(--f-ui);font-size:12.5px;color:var(--ink);
+    background:var(--field);border:1px solid var(--rule-2);border-radius:3px;
+    padding:7px 8px;
+  }
+  select:focus-visible{outline:2px solid var(--signal);outline-offset:1px;}
+
+  .seg{display:flex;gap:0;border:1px solid var(--rule-2);border-radius:3px;overflow:hidden;}
+  .seg button{
+    flex:1;font-family:var(--f-data);font-size:10px;letter-spacing:.08em;
+    text-transform:uppercase;padding:7px 4px;cursor:pointer;
+    background:var(--field);color:var(--ink-2);border:none;
+    border-right:1px solid var(--rule-2);
+  }
+  .seg button:last-child{border-right:none;}
+  .seg button[aria-pressed="true"]{background:var(--signal-soft);color:var(--signal);}
+  .seg button:focus-visible{outline:2px solid var(--signal);outline-offset:-2px;}
+
+  .btn{
+    font-family:var(--f-ui);font-size:12px;font-weight:600;letter-spacing:-.005em;
+    padding:9px 14px;border-radius:3px;cursor:pointer;
+    background:var(--ink);color:var(--ground);border:1px solid var(--ink);
+  }
+  .btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule-2);}
+  .btn:hover{opacity:.84;}
+  .btn:focus-visible{outline:2px solid var(--signal);outline-offset:2px;}
+  .btn-row{display:flex;gap:8px;}
+  .btn-row .btn{flex:1;}
+
+  /* ---------- stage ---------- */
+  .stage{
+    background:var(--stage);
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    min-width:0;
+  }
+  .bar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:12px 20px;border-bottom:1px solid var(--rule);
+  }
+  .bar-item{display:flex;align-items:center;gap:8px;}
+  .bar-item > span{
+    font-family:var(--f-data);font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-3);
+  }
+  .bar select{width:auto;}
+  .bar .seg{width:auto;}
+  .bar .seg button{padding:6px 11px;}
+
+  .viewport{
+    display:grid;place-items:center;padding:24px;min-height:0;
+  }
+  .plate{
+    width:min(100%,calc(100dvh - 210px));
+    aspect-ratio:1;
+    border:1px solid var(--rule-2);
+    background-color:var(--field);
+    background-image:
+      linear-gradient(45deg,var(--checker) 25%,transparent 25%),
+      linear-gradient(-45deg,var(--checker) 25%,transparent 25%),
+      linear-gradient(45deg,transparent 75%,var(--checker) 75%),
+      linear-gradient(-45deg,transparent 75%,var(--checker) 75%);
+    background-size:16px 16px;
+    background-position:0 0,0 8px,8px -8px,-8px 0;
+  }
+  .plate.ground-light{background-image:none;background-color:#ffffff;}
+  .plate.ground-dark{background-image:none;background-color:#0a0c0d;}
+  .plate svg{width:100%;height:100%;display:block;}
+
+  .tray{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:12px 20px;border-top:1px solid var(--rule);
+  }
+  .status{
+    font-family:var(--f-data);font-size:10.5px;font-variant-numeric:tabular-nums;
+    letter-spacing:.03em;color:var(--ink-3);margin-left:auto;text-align:right;
+  }
+
+  @media (max-width:900px){
+    .rw{grid-template-columns:1fr;height:auto;}
+    .console{border-right:none;border-bottom:1px solid var(--rule);}
+    .plate{width:min(100%,520px);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+
+<div class="rw">
+  <aside class="console">
+    <div class="masthead">
+      <h1>Radio Wave Generator</h1>
+      <p>Generative mono · SVG export</p>
+    </div>
+
+    <section class="fx">
+      <div class="fx-head"><span class="fx-kind">FX</span><h2>Radio Waves</h2></div>
+
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="quality">Render Quality</label><span class="readout" id="v-quality">10</span></div>
         <input type="range" id="quality" min="1" max="80" step="1" value="10">
+        <p class="note">Sets the facet count of each ring. Low values stay polygonal; 60 and above resolve to true circles.</p>
       </div>
-      <p class="hint">Also sets ring facet count — low quality renders faceted polygons instead of circles, matching AE's Radio Waves behavior.</p>
+
+      <div class="group">Wave Motion</div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="frequency">Frequency</label><span class="readout" id="v-frequency">1.50</span></div>
+        <input type="range" id="frequency" min="0.1" max="10" step="0.01" value="1.5">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="expansion">Expansion</label><span class="readout" id="v-expansion">9.50</span></div>
+        <input type="range" id="expansion" min="0.1" max="30" step="0.01" value="9.5">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="direction">Direction</label><span class="readout" id="v-direction">0x+0.0°</span></div>
+        <input type="range" id="direction" min="-180" max="180" step="0.1" value="0">
+      </div>
+
+      <div class="group">Stroke</div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="profile">Profile</label></div>
+        <select id="profile">
+          <option value="square" selected>Square</option>
+          <option value="round">Round</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="opacity">Opacity</label><span class="readout" id="v-opacity">1.00</span></div>
+        <input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="fadeout">Fade-out Time</label><span class="readout" id="v-fadeout">10.0</span></div>
+        <input type="range" id="fadeout" min="0.5" max="30" step="0.1" value="10">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="startwidth">Start Width</label><span class="readout" id="v-startwidth">50</span></div>
+        <input type="range" id="startwidth" min="0" max="200" step="1" value="50">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="endwidth">End Width</label><span class="readout" id="v-endwidth">100</span></div>
+        <input type="range" id="endwidth" min="0" max="200" step="1" value="100">
+      </div>
+    </section>
+
+    <section class="fx">
+      <div class="fx-head"><span class="fx-kind">FX</span><h2>Gaussian Blur</h2></div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="bluriness">Bluriness</label><span class="readout" id="v-bluriness">150</span></div>
+        <input type="range" id="bluriness" min="0" max="500" step="1" value="150">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="blurdim">Blur Dimensions</label><span class="readout" id="v-blurdim">20</span></div>
+        <input type="range" id="blurdim" min="0" max="100" step="1" value="20">
+        <p class="note">0 blurs horizontally, 50 blurs both axes evenly, 100 blurs vertically.</p>
+      </div>
+    </section>
+
+    <section class="fx">
+      <div class="fx-head"><span class="fx-kind">FX</span><h2>Levels</h2></div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="ablack">Alpha Input Black</label><span class="readout" id="v-ablack">123</span></div>
+        <input type="range" id="ablack" min="0" max="255" step="1" value="123">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="awhite">Alpha Input White</label><span class="readout" id="v-awhite">195</span></div>
+        <input type="range" id="awhite" min="0" max="255" step="1" value="195">
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="agamma">Alpha Gamma</label><span class="readout" id="v-agamma">1.00</span></div>
+        <input type="range" id="agamma" min="0.1" max="5" step="0.01" value="1">
+      </div>
+      <p class="note">Crushing the alpha range is what turns the blurred field back into hard-edged bands.</p>
+    </section>
+
+    <section class="fx">
+      <div class="fx-head"><span class="fx-kind">Seed</span><h2>Variation</h2></div>
+      <div class="ctrl">
+        <div class="ctrl-top"><label for="wobble">Wobble</label><span class="readout" id="v-wobble">0</span></div>
+        <input type="range" id="wobble" min="0" max="100" step="1" value="0">
+        <p class="note">Offsets each ring's radius and rotation from the current seed. Leave at zero for a clean, repeatable result.</p>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn ghost" id="btn-reroll">Reroll seed</button>
+        <button type="button" class="btn ghost" id="btn-reset">Reset</button>
+      </div>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <div class="bar">
+      <div class="bar-item">
+        <span>Canvas</span>
+        <select id="canvasSize" aria-label="Canvas size">
+          <option value="600">600 × 600</option>
+          <option value="800" selected>800 × 800</option>
+          <option value="1080">1080 × 1080</option>
+        </select>
+      </div>
+      <div class="bar-item">
+        <span>Ink</span>
+        <div class="seg" id="inkSeg">
+          <button type="button" data-ink="#000000" aria-pressed="true">Black</button>
+          <button type="button" data-ink="#ffffff" aria-pressed="false">White</button>
+        </div>
+      </div>
+      <div class="bar-item">
+        <span>Preview on</span>
+        <div class="seg" id="groundSeg">
+          <button type="button" data-ground="checker" aria-pressed="true">Checker</button>
+          <button type="button" data-ground="light" aria-pressed="false">Light</button>
+          <button type="button" data-ground="dark" aria-pressed="false">Dark</button>
+        </div>
+      </div>
     </div>
 
-    <div class="sub-legend">Wave Motion</div>
-    <div class="row">
-      <label>Frequency <span class="val" id="v-frequency">1.50</span></label>
-      <input type="range" id="frequency" min="0.1" max="10" step="0.01" value="1.5">
-    </div>
-    <div class="row">
-      <label>Expansion <span class="val" id="v-expansion">9.50</span></label>
-      <input type="range" id="expansion" min="0.1" max="30" step="0.01" value="9.5">
-    </div>
-    <div class="row">
-      <label>Direction <span class="val" id="v-direction">0x+0.0°</span></label>
-      <input type="range" id="direction" min="-180" max="180" step="0.1" value="0">
+    <div class="viewport">
+      <div class="plate" id="plate"></div>
     </div>
 
-    <div class="sub-legend">Stroke</div>
-    <div class="row">
-      <label>Profile</label>
-      <select id="profile">
-        <option value="square" selected>Square</option>
-        <option value="round">Round</option>
-      </select>
+    <div class="tray">
+      <button type="button" class="btn" id="btn-export">Export SVG</button>
+      <button type="button" class="btn ghost" id="btn-copy">Copy markup</button>
+      <p class="status" id="status"></p>
     </div>
-    <div class="row">
-      <label>Opacity <span class="val" id="v-opacity">1.00</span></label>
-      <input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
-    </div>
-    <div class="row">
-      <label>Fade-out Time <span class="val" id="v-fadeout">10</span></label>
-      <input type="range" id="fadeout" min="0.5" max="30" step="0.1" value="10">
-    </div>
-    <div class="row">
-      <label>Start Width <span class="val" id="v-startwidth">50</span></label>
-      <input type="range" id="startwidth" min="0" max="200" step="1" value="50">
-    </div>
-    <div class="row">
-      <label>End Width <span class="val" id="v-endwidth">100</span></label>
-      <input type="range" id="endwidth" min="0" max="200" step="1" value="100">
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>FX &gt; Gaussian Blur</legend>
-    <div class="row">
-      <label>Bluriness <span class="val" id="v-bluriness">150</span></label>
-      <input type="range" id="bluriness" min="0" max="500" step="1" value="150">
-    </div>
-    <div class="row">
-      <label>Blur Dimensions <span class="val" id="v-blurdim">20</span></label>
-      <input type="range" id="blurdim" min="0" max="100" step="1" value="20">
-      <p class="hint">0 = horizontal only, 50 = horizontal &amp; vertical, 100 = vertical only.</p>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>FX &gt; Levels</legend>
-    <div class="row">
-      <label>Alpha Input Black <span class="val" id="v-ablack">123</span></label>
-      <input type="range" id="ablack" min="0" max="255" step="1" value="123">
-    </div>
-    <div class="row">
-      <label>Alpha Input White <span class="val" id="v-awhite">195</span></label>
-      <input type="range" id="awhite" min="0" max="255" step="1" value="195">
-    </div>
-    <div class="row">
-      <label>Alpha Gamma <span class="val" id="v-agamma">1.00</span></label>
-      <input type="range" id="agamma" min="0.1" max="5" step="0.01" value="1">
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Generative Seed</legend>
-    <div class="row">
-      <label>Wobble <span class="val" id="v-wobble">0</span></label>
-      <input type="range" id="wobble" min="0" max="100" step="1" value="0">
-      <p class="hint">Organic jitter applied per-ring using the current seed. Optional — leave at 0 for a clean deterministic result.</p>
-    </div>
-    <div class="btnrow">
-      <button type="button" class="secondary" id="btn-reroll">Reroll Seed</button>
-      <button type="button" class="secondary" id="btn-reset">Reset All</button>
-    </div>
-  </fieldset>
-</div>
-
-<div class="stage" id="stage">
-  <div class="stagebar">
-    <label class="meta" for="canvasSize">Canvas</label>
-    <select id="canvasSize">
-      <option value="600">600 × 600</option>
-      <option value="800" selected>800 × 800</option>
-      <option value="1080">1080 × 1080</option>
-    </select>
-    <div class="toggles">
-      <button type="button" class="secondary active" data-bg="checker">Checker</button>
-      <button type="button" class="secondary" data-bg="white">White</button>
-      <button type="button" class="secondary" data-bg="black">Black</button>
-    </div>
-  </div>
-
-  <div class="canvas-wrap" id="canvasWrap"></div>
-
-  <div class="footer-actions">
-    <button type="button" id="btn-export">Export SVG</button>
-    <button type="button" class="secondary" id="btn-copy">Copy SVG Markup</button>
-    <span class="meta" id="ringInfo"></span>
-  </div>
-
-  <textarea id="svgOut" readonly></textarea>
+  </main>
 </div>
 
 <script>
@@ -241,9 +383,12 @@
   "use strict";
 
   var ids = ["quality","frequency","expansion","direction","opacity","fadeout",
-              "startwidth","endwidth","bluriness","blurdim","ablack","awhite","agamma","wobble"];
+             "startwidth","endwidth","bluriness","blurdim","ablack","awhite","agamma","wobble"];
 
   var seed = 1234567;
+  var inkColor = "#000000";
+  var lastSVG = "";
+
   function mulberry32(a){
     return function(){
       a |= 0; a = a + 0x6D2B79F5 | 0;
@@ -252,8 +397,8 @@
       return ((t ^ t >>> 14) >>> 0) / 4294967296;
     };
   }
-
   function el(id){ return document.getElementById(id); }
+  function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
 
   function readParams(){
     var p = {};
@@ -267,9 +412,8 @@
     el("v-quality").textContent = p.quality.toFixed(0);
     el("v-frequency").textContent = p.frequency.toFixed(2);
     el("v-expansion").textContent = p.expansion.toFixed(2);
-    var dirDeg = p.direction;
-    var revs = Math.trunc(dirDeg / 360);
-    var rem = (dirDeg - revs*360).toFixed(1);
+    var revs = Math.trunc(p.direction / 360);
+    var rem = (p.direction - revs*360).toFixed(1);
     el("v-direction").textContent = revs + "x+" + rem + "°";
     el("v-opacity").textContent = p.opacity.toFixed(2);
     el("v-fadeout").textContent = p.fadeout.toFixed(1);
@@ -283,24 +427,14 @@
     el("v-wobble").textContent = p.wobble.toFixed(0);
   }
 
-  function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
-
-  function alphaTable(black, white, gamma, steps){
-    steps = steps || 32;
-    var vals = [];
+  function alphaTable(black, white, gamma){
+    var steps = 32, vals = [];
     var g = gamma > 0 ? gamma : 1;
     for(var i=0;i<steps;i++){
-      var x = i/(steps-1);
-      var input = x*255;
-      var v;
-      if(white <= black){
-        v = input >= white ? 1 : 0;
-      } else {
-        v = (input - black) / (white - black);
-      }
+      var input = (i/(steps-1))*255;
+      var v = white <= black ? (input >= white ? 1 : 0) : (input - black)/(white - black);
       v = clamp(v, 0, 1);
-      v = Math.pow(v, 1/g);
-      vals.push(v.toFixed(4));
+      vals.push(Math.pow(v, 1/g).toFixed(4));
     }
     return vals.join(" ");
   }
@@ -311,11 +445,11 @@
     var ringCount = clamp(Math.round(p.frequency * p.fadeout), 1, 200);
     var rng = mulberry32(seed);
 
-    // All AE values are authored against a nominal 1400px comp, then scaled to the canvas.
+    // AE values are authored against a nominal comp, then scaled to the canvas
+    // so spacing, stroke width and blur stay in proportion at any export size.
     var scale = size / REF_COMP;
     var spacing = p.expansion * 14 * scale;
     var cull = size * 0.78;
-
     var wobblePx = (p.wobble / 100) * spacing * 0.6;
 
     var rings = [];
@@ -325,39 +459,31 @@
       if(p.wobble > 0){ radius += (rng()*2-1) * wobblePx; }
       radius = Math.max(1, radius);
 
-      var width = (p.startwidth + (p.endwidth - p.startwidth) * t) * scale;
-      width = Math.max(0.4, width);
-
+      var width = Math.max(0.4, (p.startwidth + (p.endwidth - p.startwidth) * t) * scale);
       if(radius - width/2 > cull){ continue; }
 
-      var opacity = p.opacity * (1 - t);
-      opacity = clamp(opacity, 0, 1);
-
-      var rot = p.wobble > 0 ? (rng()*2-1) * 8 : 0;
-
-      rings.push({ radius: radius, width: width, opacity: opacity, rot: rot });
+      rings.push({
+        radius: radius,
+        width: width,
+        opacity: clamp(p.opacity * (1 - t), 0, 1),
+        rot: p.wobble > 0 ? (rng()*2-1) * 8 : 0
+      });
     }
     return { rings: rings, ringCount: rings.length, scale: scale };
   }
 
   function polygonPoints(radius, sides, rotDeg){
-    var pts = [];
-    var rot = rotDeg * Math.PI/180;
+    var pts = [], rot = rotDeg * Math.PI/180;
     for(var s=0;s<sides;s++){
       var a = rot + (s/sides) * Math.PI*2 - Math.PI/2;
-      var x = Math.cos(a)*radius;
-      var y = Math.sin(a)*radius;
-      pts.push(x.toFixed(2)+","+y.toFixed(2));
+      pts.push((Math.cos(a)*radius).toFixed(2)+","+(Math.sin(a)*radius).toFixed(2));
     }
     return pts.join(" ");
   }
 
   function buildSVG(p){
     var size = p.canvasSize;
-    var cx = size/2, cy = size/2;
     var built = buildRings(p, size);
-    var rings = built.rings;
-
     var sides = Math.max(3, Math.round(p.quality));
     var useCircle = p.quality >= 60;
     var linecap = p.profile === "round" ? "round" : "square";
@@ -365,61 +491,52 @@
 
     var stdBase = (p.bluriness / 8) * built.scale;
     var vRatio = p.blurdim / 50;
-    var stdY = stdBase * vRatio;
-    var stdX = stdBase * (2 - vRatio);
-    stdX = Math.max(0, stdX);
-    stdY = Math.max(0, stdY);
+    var stdX = Math.max(0, stdBase * (2 - vRatio));
+    var stdY = Math.max(0, stdBase * vRatio);
 
-    var table = alphaTable(p.ablack, p.awhite, p.agamma);
-
-    var shapes = rings.map(function(r){
+    var shapes = built.rings.map(function(r){
+      var common = 'fill="none" stroke="'+inkColor+'" stroke-width="'+r.width.toFixed(2)+
+        '" stroke-opacity="'+r.opacity.toFixed(3)+'" stroke-linecap="'+linecap+'"';
       if(useCircle){
-        return '<circle cx="0" cy="0" r="'+r.radius.toFixed(2)+'" fill="none" stroke="#000000" ' +
-          'stroke-width="'+r.width.toFixed(2)+'" stroke-opacity="'+r.opacity.toFixed(3)+'" ' +
-          'stroke-linecap="'+linecap+'"/>';
-      } else {
-        return '<polygon points="'+polygonPoints(r.radius, sides, r.rot + p.direction)+'" fill="none" stroke="#000000" ' +
-          'stroke-width="'+r.width.toFixed(2)+'" stroke-opacity="'+r.opacity.toFixed(3)+'" ' +
-          'stroke-linecap="'+linecap+'" stroke-linejoin="'+linejoin+'"/>';
+        return '<circle cx="0" cy="0" r="'+r.radius.toFixed(2)+'" '+common+'/>';
       }
+      return '<polygon points="'+polygonPoints(r.radius, sides, r.rot + p.direction)+'" '+
+        common+' stroke-linejoin="'+linejoin+'"/>';
     }).join("\n      ");
 
-    var groupTransform = useCircle
-      ? 'translate('+cx+' '+cy+') rotate('+p.direction.toFixed(1)+')'
-      : 'translate('+cx+' '+cy+')';
+    var transform = 'translate('+(size/2)+' '+(size/2)+')' +
+      (useCircle ? ' rotate('+p.direction.toFixed(1)+')' : '');
 
-    var svg = [
-      '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">',
-      '  <defs>',
-      '    <filter id="radioWaveFx" x="-50%" y="-50%" width="200%" height="200%">',
-      '      <feGaussianBlur in="SourceGraphic" stdDeviation="'+stdX.toFixed(3)+' '+stdY.toFixed(3)+'" result="blurred"/>',
-      '      <feComponentTransfer in="blurred">',
-      '        <feFuncA type="table" tableValues="'+table+'"/>',
-      '      </feComponentTransfer>',
-      '    </filter>',
-      '  </defs>',
-      '  <g transform="'+groupTransform+'" filter="url(#radioWaveFx)">',
-      '      '+shapes,
-      '  </g>',
-      '</svg>'
-    ].join("\n");
-
-    return { svg: svg, ringCount: built.ringCount };
+    return {
+      ringCount: built.ringCount,
+      svg: [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">',
+        '  <defs>',
+        '    <filter id="radioWaveFx" x="-50%" y="-50%" width="200%" height="200%">',
+        '      <feGaussianBlur in="SourceGraphic" stdDeviation="'+stdX.toFixed(3)+' '+stdY.toFixed(3)+'" result="blurred"/>',
+        '      <feComponentTransfer in="blurred">',
+        '        <feFuncA type="table" tableValues="'+alphaTable(p.ablack, p.awhite, p.agamma)+'"/>',
+        '      </feComponentTransfer>',
+        '    </filter>',
+        '  </defs>',
+        '  <g transform="'+transform+'" filter="url(#radioWaveFx)">',
+        '      '+shapes,
+        '  </g>',
+        '</svg>'
+      ].join("\n")
+    };
   }
 
-  var wrap = el("canvasWrap");
-  var ringInfo = el("ringInfo");
+  var plate = el("plate");
 
   function render(){
     var p = readParams();
     updateLabels(p);
     var out = buildSVG(p);
-    wrap.innerHTML = out.svg;
-    ringInfo.textContent = out.ringCount + " rings · seed " + seed;
+    plate.innerHTML = out.svg;
     lastSVG = out.svg;
+    el("status").textContent = out.ringCount + " rings · seed " + seed;
   }
-
-  var lastSVG = "";
 
   ids.forEach(function(id){ el(id).addEventListener("input", render); });
   el("profile").addEventListener("change", render);
@@ -441,20 +558,32 @@
     render();
   });
 
-  document.querySelectorAll(".toggles button").forEach(function(btn){
-    btn.addEventListener("click", function(){
-      document.querySelectorAll(".toggles button").forEach(function(b){ b.classList.remove("active"); });
-      btn.classList.add("active");
-      var stage = el("stage");
-      stage.classList.remove("bg-white","bg-black");
-      var mode = btn.getAttribute("data-bg");
-      if(mode === "white") stage.classList.add("bg-white");
-      if(mode === "black") stage.classList.add("bg-black");
+  function wireSeg(segId, onPick){
+    var seg = el(segId);
+    seg.addEventListener("click", function(e){
+      var btn = e.target.closest("button");
+      if(!btn) return;
+      seg.querySelectorAll("button").forEach(function(b){
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      onPick(btn);
     });
+  }
+
+  wireSeg("inkSeg", function(btn){
+    inkColor = btn.getAttribute("data-ink");
+    render();
+  });
+
+  wireSeg("groundSeg", function(btn){
+    plate.classList.remove("ground-light","ground-dark");
+    var g = btn.getAttribute("data-ground");
+    if(g === "light") plate.classList.add("ground-light");
+    if(g === "dark") plate.classList.add("ground-dark");
   });
 
   el("btn-export").addEventListener("click", function(){
-    var blob = new Blob([lastSVG], {type: "image/svg+xml"});
+    var blob = new Blob([lastSVG], {type:"image/svg+xml"});
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
@@ -466,19 +595,17 @@
   });
 
   el("btn-copy").addEventListener("click", function(){
-    var ta = el("svgOut");
-    ta.value = lastSVG;
-    ta.style.display = "block";
-    ta.select();
-    try{
-      document.execCommand("copy");
-    }catch(e){
-      if(navigator.clipboard){ navigator.clipboard.writeText(lastSVG); }
+    var btn = this, original = btn.textContent;
+    function done(msg){
+      btn.textContent = msg;
+      setTimeout(function(){ btn.textContent = original; }, 1400);
     }
-    var original = this.textContent;
-    var self = this;
-    self.textContent = "Copied!";
-    setTimeout(function(){ self.textContent = original; ta.style.display = "none"; }, 1200);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(lastSVG).then(function(){ done("Copied"); },
+        function(){ done("Copy blocked"); });
+    } else {
+      done("Copy blocked");
+    }
   });
 
   render();
