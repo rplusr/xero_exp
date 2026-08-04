@@ -1,0 +1,515 @@
+/* ---------------------------------------------------------------- */
+/* Path generator — workspace layout                                 */
+/* ---------------------------------------------------------------- */
+
+:root {
+  --pg-top: calc(var(--nav-margin) + var(--nav-height) + var(--space-3));
+  --pg-panel-width: 336px;
+  --pg-surface: rgba(255, 255, 255, 0.05);
+  --pg-surface-hi: rgba(255, 255, 255, 0.1);
+  --pg-border: rgba(255, 255, 255, 0.14);
+  --pg-radius: 14px;
+}
+
+.pg-page {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-3);
+  padding: var(--pg-top) var(--nav-margin) var(--nav-margin);
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------- */
+/* Control panel                                                     */
+/* ---------------------------------------------------------------- */
+
+.pg-panel {
+  flex: 0 0 var(--pg-panel-width);
+  width: var(--pg-panel-width);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--pg-surface);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--nav-radius);
+  overflow-y: auto;
+  max-height: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.pg-panel::-webkit-scrollbar { width: 8px; }
+.pg-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+}
+
+.pg-title {
+  margin: 0;
+  font-family: var(--font-condensed);
+  font-weight: var(--weight-bold);
+  font-size: 30px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.pg-lede {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-small);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pg-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--pg-border);
+}
+
+.pg-panel-head + .pg-group { border-top: 0; padding-top: 0; }
+
+.pg-group-title {
+  margin: 0 0 var(--space-1);
+  font-size: var(--fs-label);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.pg-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---------------------------------------------------------------- */
+/* Fields                                                            */
+/* ---------------------------------------------------------------- */
+
+.pg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pg-field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--fs-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pg-field-label output {
+  font-variant-numeric: tabular-nums;
+  color: var(--paper);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  transition: transform var(--t-fast) var(--ease);
+}
+
+input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
+
+input[type="range"]::-moz-range-track {
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+.pg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.pg-seed {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pg-seed input {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--paper);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--pg-border);
+  border-radius: 10px;
+}
+
+.pg-seed input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Checkboxes ------------------------------------------------------ */
+
+.pg-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-small);
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pg-check input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 19px;
+  margin: 0;
+  border-radius: 19px;
+  background: rgba(255, 255, 255, 0.18);
+  position: relative;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease);
+}
+
+.pg-check input::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--paper);
+  transition: transform var(--t-fast) var(--ease);
+}
+
+.pg-check input:checked { background: var(--accent); }
+.pg-check input:checked::after { transform: translateX(15px); }
+.pg-check input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Segmented controls ---------------------------------------------- */
+
+.pg-segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--pg-border);
+  border-radius: 12px;
+}
+
+.pg-segmented--wrap { flex-wrap: wrap; }
+
+.pg-segmented button {
+  flex: 1 1 auto;
+  padding: 7px 10px;
+  font-family: var(--font);
+  font-size: var(--fs-label);
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+
+.pg-segmented button:hover { color: var(--paper); background: var(--pg-surface-hi); }
+
+.pg-segmented button.is-active {
+  color: var(--nav-text);
+  background: var(--paper);
+}
+
+/* Swatches -------------------------------------------------------- */
+
+.pg-swatches {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.swatch {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--pg-border);
+  border-radius: 50%;
+  background: var(--swatch, #fff);
+  cursor: pointer;
+  transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+
+.swatch:hover { transform: scale(1.08); }
+
+.swatch.is-active {
+  box-shadow: 0 0 0 2px var(--page-bg), 0 0 0 4px var(--accent);
+}
+
+.swatch--custom {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: conic-gradient(#13B5EA, #7CD4FF, #FFFFFF, #1A1A1A, #13B5EA);
+}
+
+.swatch--custom input {
+  width: 200%;
+  height: 200%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Buttons --------------------------------------------------------- */
+
+.pg-btn {
+  padding: 9px 14px;
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  color: var(--paper);
+  background: var(--pg-surface-hi);
+  border: 1px solid var(--pg-border);
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease),
+              border-color var(--t-fast) var(--ease);
+}
+
+.pg-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: rgba(255, 255, 255, 0.3); }
+.pg-btn:active { transform: translateY(1px); }
+
+.pg-btn--primary {
+  color: var(--nav-text);
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: var(--weight-bold);
+}
+
+.pg-btn--primary:hover { background: #38C6F2; border-color: #38C6F2; }
+
+.pg-btn--ghost { background: transparent; }
+
+.pg-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pg-actions .pg-btn { width: 100%; }
+
+/* ---------------------------------------------------------------- */
+/* Stage                                                             */
+/* ---------------------------------------------------------------- */
+
+.pg-stage-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pg-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.pg-toolbar-group { display: flex; gap: var(--space-2); }
+.pg-toolbar .pg-segmented { flex: 0 0 auto; }
+.pg-toolbar .pg-segmented button { padding: 7px 16px; }
+
+.pg-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 380px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-3);
+  background: var(--pg-surface);
+  border: 1px solid var(--pg-border);
+  border-radius: var(--nav-radius);
+  overflow: hidden;
+}
+
+.pg-canvas {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  display: block;
+  border-radius: 8px;
+  touch-action: none;
+  cursor: crosshair;
+  overflow: visible;
+}
+
+.pg-stage.is-drawing .pg-canvas { cursor: cell; }
+
+/* Transparent background: show a checkerboard behind the artwork. */
+.pg-stage.is-checkered .pg-canvas {
+  background-color: #0B1160;
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.06) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.pg-grid { color: rgba(255, 255, 255, 0.16); pointer-events: none; }
+.pg-curve { pointer-events: none; }
+.pg-curve-hit { cursor: copy; }
+
+.pg-draft {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 6 6;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.pg-joints .joint {
+  fill: var(--paper);
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  cursor: grab;
+  transition: fill var(--t-fast) var(--ease);
+  vector-effect: non-scaling-stroke;
+}
+
+.pg-joints .joint:hover { fill: var(--accent); }
+
+.pg-joints .joint.is-selected {
+  fill: var(--accent);
+  stroke: var(--paper);
+}
+
+/* Status bar ------------------------------------------------------ */
+
+.pg-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: 0 var(--space-2);
+  font-size: var(--fs-label);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.pg-stats {
+  display: flex;
+  gap: var(--space-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.pg-stats strong { color: var(--paper); font-weight: var(--weight-bold); }
+
+.pg-shortcuts { margin: 0; }
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--paper);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--pg-border);
+  border-radius: 5px;
+}
+
+/* Toast ----------------------------------------------------------- */
+
+.pg-toast {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translate(-50%, 12px);
+  padding: 9px 16px;
+  font-size: var(--fs-small);
+  color: var(--nav-text);
+  background: var(--paper);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-default) var(--ease), transform var(--t-default) var(--ease);
+}
+
+.pg-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------------------------------------------------------------- */
+/* Responsive                                                        */
+/* ---------------------------------------------------------------- */
+
+@media (max-width: 1024px) {
+  .pg-page {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  .pg-panel {
+    flex: 0 0 auto;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .pg-stage { min-height: 60vh; }
+}

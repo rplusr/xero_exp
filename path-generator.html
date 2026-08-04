@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Xero — Path Generator</title>
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/path-generator.css" />
+</head>
+<body>
+
+<header class="site-header" id="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <a href="index.html" class="logo" aria-label="Xero — home">
+        <img src="assets/img/xero-wordmark-logo.svg" alt="Xero" class="logo-mark" />
+      </a>
+      <span class="brand-subtitle">Brand Guidelines</span>
+    </div>
+
+    <div class="header-actions">
+      <nav class="nav" aria-label="Primary">
+        <ul>
+          <li class="nav-item" data-panel="principles">
+            <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
+              <span>Principles</span>
+              <span class="nav-chevron" aria-hidden="true">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item" data-panel="expression">
+            <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
+              <span>Expression</span>
+              <span class="nav-chevron" aria-hidden="true">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item" data-panel="resources">
+            <a href="#" class="nav-link" aria-expanded="false" aria-controls="mega-panel">
+              <span>Resources</span>
+              <span class="nav-chevron" aria-hidden="true">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <button class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="mobile-overlay">
+        <span class="menu-toggle-icon" aria-hidden="true">
+          <span class="menu-toggle-bar"></span>
+          <span class="menu-toggle-bar"></span>
+          <span class="menu-toggle-bar"></span>
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="mega-panel" id="mega-panel">
+  <div class="mega-content" data-panel="principles">
+    <a href="#" class="mega-row" data-scramble="Brand Archetype">Brand Archetype</a>
+    <a href="#" class="mega-row" data-scramble="Brand Attributes">Brand Attributes</a>
+    <a href="brand-values.html" class="mega-row" data-scramble="Brand Values">Brand Values</a>
+  </div>
+  <div class="mega-content" data-panel="expression">
+    <a href="index.html" class="mega-row" data-scramble="Logo">Logo</a>
+    <a href="index.html" class="mega-row" data-scramble="Colour">Colour</a>
+    <a href="index.html" class="mega-row" data-scramble="Wordmark & Lockups">Wordmark &amp; Lockups</a>
+    <a href="index.html" class="mega-row" data-scramble="Typography">Typography</a>
+    <a href="index.html" class="mega-row" data-scramble="Illustration">Illustration</a>
+    <a href="index.html" class="mega-row" data-scramble="Photography">Photography</a>
+    <a href="index.html" class="mega-row" data-scramble="Infographics & UI">Infographics &amp; UI</a>
+    <a href="index.html" class="mega-row" data-scramble="Shapes & Cropping">Shapes &amp; Cropping</a>
+    <a href="index.html" class="mega-row" data-scramble="Examples">Examples</a>
+  </div>
+  <div class="mega-content" data-panel="resources">
+    <a href="path-generator.html" class="mega-row" data-scramble="Path Generator">Path Generator</a>
+    <a href="#" class="mega-row" data-scramble="Brand Attributes">Brand Attributes</a>
+    <a href="brand-values.html" class="mega-row" data-scramble="Brand Values">Brand Values</a>
+  </div>
+</div>
+
+<div class="mobile-overlay" id="mobile-overlay">
+  <nav aria-label="Primary mobile">
+    <ul>
+      <li class="mobile-item" data-panel="principles">
+        <button type="button" class="mobile-link" data-scramble="Principles" aria-expanded="false">
+          <span>Principles</span>
+          <span class="mobile-chevron" aria-hidden="true">
+            <svg width="12" height="7" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="mobile-sublist-wrap">
+          <ul class="mobile-sublist">
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Archetype">Brand Archetype</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Attributes">Brand Attributes</a></li>
+            <li><a href="brand-values.html" class="mobile-sublink" data-scramble="Brand Values">Brand Values</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mobile-item" data-panel="expression">
+        <button type="button" class="mobile-link" data-scramble="Expression" aria-expanded="false">
+          <span>Expression</span>
+          <span class="mobile-chevron" aria-hidden="true">
+            <svg width="12" height="7" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="mobile-sublist-wrap">
+          <ul class="mobile-sublist">
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Logo">Logo</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Colour">Colour</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Wordmark & Lockups">Wordmark &amp; Lockups</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Typography">Typography</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Illustration">Illustration</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Photography">Photography</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Infographics & UI">Infographics &amp; UI</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Shapes & Cropping">Shapes &amp; Cropping</a></li>
+            <li><a href="index.html" class="mobile-sublink" data-scramble="Examples">Examples</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="mobile-item" data-panel="resources">
+        <button type="button" class="mobile-link" data-scramble="Resources" aria-expanded="false">
+          <span>Resources</span>
+          <span class="mobile-chevron" aria-hidden="true">
+            <svg width="12" height="7" viewBox="0 0 10 6" fill="none">
+              <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+        <div class="mobile-sublist-wrap">
+          <ul class="mobile-sublist">
+            <li><a href="path-generator.html" class="mobile-sublink" data-scramble="Path Generator">Path Generator</a></li>
+            <li><a href="#" class="mobile-sublink" data-scramble="Brand Attributes">Brand Attributes</a></li>
+            <li><a href="brand-values.html" class="mobile-sublink" data-scramble="Brand Values">Brand Values</a></li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<main class="pg-page">
+
+  <!-- ---------------------------------------------------------- -->
+  <!-- Controls                                                    -->
+  <!-- ---------------------------------------------------------- -->
+  <aside class="pg-panel" aria-label="Path controls">
+
+    <div class="pg-panel-head">
+      <h1 class="pg-title">Path generator</h1>
+      <p class="pg-lede">
+        Monoweight curves built from a chain of joints. Generate a flowing
+        line, reshape it by hand, export clean SVG.
+      </p>
+    </div>
+
+    <section class="pg-group">
+      <h2 class="pg-group-title">Shape</h2>
+
+      <div class="pg-segmented pg-segmented--wrap" data-segmented="shape" role="group" aria-label="Shape preset">
+        <button type="button" data-value="meander">Meander</button>
+        <button type="button" data-value="wave">Wave</button>
+        <button type="button" data-value="ribbon">Ribbon</button>
+        <button type="button" data-value="spiral">Spiral</button>
+        <button type="button" data-value="loop">Loop</button>
+      </div>
+
+      <label class="pg-field" for="count">
+        <span class="pg-field-label">Joints <output id="count-out">14</output></span>
+        <input type="range" id="count" min="3" max="120" step="1" value="14" />
+      </label>
+
+      <label class="pg-field" for="wobble">
+        <span class="pg-field-label">Wander <output id="wobble-out">55%</output></span>
+        <input type="range" id="wobble" min="0" max="1" step="0.01" value="0.55" />
+      </label>
+
+      <div class="pg-row">
+        <label class="pg-seed" for="seed">
+          <span class="pg-field-label">Seed</span>
+          <input type="number" id="seed" value="1234" min="0" step="1" />
+        </label>
+        <button type="button" class="pg-btn" id="shuffle" title="Shuffle (G)">Shuffle</button>
+        <button type="button" class="pg-btn pg-btn--ghost" id="regenerate" title="Rebuild from the current settings">Rebuild</button>
+      </div>
+    </section>
+
+    <section class="pg-group">
+      <h2 class="pg-group-title">Curve</h2>
+
+      <label class="pg-field" for="tension">
+        <span class="pg-field-label">Smoothing <output id="tension-out">1.00</output></span>
+        <input type="range" id="tension" min="0" max="1.6" step="0.01" value="1" />
+      </label>
+
+      <span class="pg-field-label">Joint spacing</span>
+      <div class="pg-segmented" data-segmented="spacing" role="group" aria-label="Knot spacing">
+        <button type="button" data-value="uniform">Uniform</button>
+        <button type="button" data-value="centripetal">Centripetal</button>
+        <button type="button" data-value="chordal">Chordal</button>
+      </div>
+      <p class="pg-hint">
+        Centripetal never overshoots or cusps between joints — the safe default
+        for a dense chain of joints.
+      </p>
+
+      <label class="pg-check" for="closed">
+        <input type="checkbox" id="closed" />
+        <span>Close the path <kbd>C</kbd></span>
+      </label>
+    </section>
+
+    <section class="pg-group">
+      <h2 class="pg-group-title">Stroke</h2>
+
+      <label class="pg-field" for="strokeWidth">
+        <span class="pg-field-label">Weight <output id="strokeWidth-out">6 px</output></span>
+        <input type="range" id="strokeWidth" min="1" max="48" step="0.5" value="6" />
+      </label>
+
+      <span class="pg-field-label">Colour</span>
+      <div class="pg-swatches">
+        <button type="button" class="swatch" data-colour="#13B5EA" aria-label="Xero blue"></button>
+        <button type="button" class="swatch" data-colour="#FFFFFF" aria-label="White"></button>
+        <button type="button" class="swatch" data-colour="#1A1A1A" aria-label="Ink"></button>
+        <button type="button" class="swatch" data-colour="#000856" aria-label="Navy"></button>
+        <label class="swatch swatch--custom" title="Custom colour">
+          <input type="color" id="stroke-colour" value="#13B5EA" />
+        </label>
+      </div>
+
+      <span class="pg-field-label">Ends</span>
+      <div class="pg-segmented" data-segmented="cap" role="group" aria-label="Line cap">
+        <button type="button" data-value="round">Round</button>
+        <button type="button" data-value="butt">Flat</button>
+        <button type="button" data-value="square">Square</button>
+      </div>
+    </section>
+
+    <section class="pg-group">
+      <h2 class="pg-group-title">Canvas</h2>
+
+      <span class="pg-field-label">Background</span>
+      <div class="pg-segmented pg-segmented--wrap" data-segmented="background" role="group" aria-label="Background">
+        <button type="button" data-value="navy">Navy</button>
+        <button type="button" data-value="paper">Paper</button>
+        <button type="button" data-value="deep">Grey</button>
+        <button type="button" data-value="ink">Ink</button>
+        <button type="button" data-value="none">None</button>
+      </div>
+
+      <label class="pg-check" for="showJoints">
+        <input type="checkbox" id="showJoints" checked />
+        <span>Show joints while editing <kbd>J</kbd></span>
+      </label>
+      <label class="pg-check" for="showGrid">
+        <input type="checkbox" id="showGrid" />
+        <span>Grid</span>
+      </label>
+      <label class="pg-check" for="snap">
+        <input type="checkbox" id="snap" />
+        <span>Snap joints to grid</span>
+      </label>
+    </section>
+
+    <section class="pg-group">
+      <h2 class="pg-group-title">Export</h2>
+
+      <label class="pg-check" for="trim">
+        <input type="checkbox" id="trim" checked />
+        <span>Trim viewBox to the path</span>
+      </label>
+      <label class="pg-check" for="jointDots">
+        <input type="checkbox" id="jointDots" />
+        <span>Include joint dots in the export</span>
+      </label>
+
+      <label class="pg-field" for="precision">
+        <span class="pg-field-label">Decimals <output id="precision-out">2</output></span>
+        <input type="range" id="precision" min="0" max="4" step="1" value="2" />
+      </label>
+
+      <div class="pg-actions">
+        <button type="button" class="pg-btn pg-btn--primary" id="download">Download SVG</button>
+        <button type="button" class="pg-btn" id="copy-svg">Copy SVG</button>
+        <button type="button" class="pg-btn pg-btn--ghost" id="copy-d">Copy path data</button>
+      </div>
+    </section>
+
+  </aside>
+
+  <!-- ---------------------------------------------------------- -->
+  <!-- Stage                                                       -->
+  <!-- ---------------------------------------------------------- -->
+  <section class="pg-stage-wrap" aria-label="Canvas">
+
+    <div class="pg-toolbar">
+      <div class="pg-segmented" role="group" aria-label="Tool">
+        <button type="button" data-mode="edit" title="Edit joints (E)">Edit</button>
+        <button type="button" data-mode="draw" title="Freehand draw (D)">Draw</button>
+      </div>
+
+      <div class="pg-toolbar-group">
+        <button type="button" class="pg-btn pg-btn--ghost" id="subdivide" title="Add a joint between every pair">Add joints</button>
+        <button type="button" class="pg-btn pg-btn--ghost" id="thin" title="Remove every other joint">Fewer joints</button>
+      </div>
+
+      <div class="pg-toolbar-group">
+        <button type="button" class="pg-btn pg-btn--ghost" id="undo" title="Undo (⌘Z)">Undo</button>
+        <button type="button" class="pg-btn pg-btn--ghost" id="redo" title="Redo (⇧⌘Z)">Redo</button>
+        <button type="button" class="pg-btn pg-btn--ghost" id="clear" title="Start from an empty canvas">Clear</button>
+      </div>
+    </div>
+
+    <div class="pg-stage" id="stage">
+      <svg id="canvas" class="pg-canvas" viewBox="0 0 1200 780" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="1" />
+          </pattern>
+        </defs>
+
+        <rect id="canvas-bg" x="0" y="0" width="1200" height="780" fill="#000856" />
+        <rect id="canvas-grid" class="pg-grid" x="0" y="0" width="1200" height="780" fill="url(#grid-pattern)" />
+
+        <path id="curve" class="pg-curve" fill="none" stroke="#13B5EA" stroke-width="6"
+              stroke-linecap="round" stroke-linejoin="round" />
+        <path id="curve-hit" class="pg-curve-hit" fill="none" stroke="transparent" stroke-width="24" />
+        <path id="draft" class="pg-draft" fill="none" style="display:none" />
+
+        <g id="joints" class="pg-joints"></g>
+      </svg>
+
+      <div class="pg-toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="pg-statusbar">
+      <div class="pg-stats">
+        <span><strong id="stat-joints">0</strong> joints</span>
+        <span><strong id="stat-segments">0</strong> curve segments</span>
+        <span><strong id="stat-length">0</strong> units long</span>
+      </div>
+      <p class="pg-shortcuts">
+        Click empty canvas to add a joint · click the line to insert one ·
+        drag to move · double-click a joint for a corner ·
+        <kbd>alt</kbd>-click to delete
+      </p>
+    </div>
+
+  </section>
+
+</main>
+
+<script src="assets/js/main.js"></script>
+<script src="assets/js/path-generator.js"></script>
+</body>
+</html>
