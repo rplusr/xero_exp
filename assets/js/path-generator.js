@@ -567,6 +567,7 @@
     el.hit.setAttribute('d', d);
 
     renderJoints();
+    renderPreview();
     renderStatus();
     save();
   }
@@ -819,10 +820,12 @@
 
   /* ------------------------------ export --------------------------- */
 
-  function exportSvg() {
+  /* The single source of truth for what leaves this tool: the preview,
+     the clipboard and the downloaded file all render this. */
+  function buildExport() {
     var exportSegs = currentSegments();
     var d = segmentsToPathData(exportSegs, state.closed, state.precision);
-    if (!d) return '';
+    if (!d) return { svg: '', view: null };
 
     var view = { x: 0, y: 0, w: DOC.w, h: DOC.h };
     if (state.trim) {
@@ -867,7 +870,37 @@
 
     lines.push('  </g>');
     lines.push('</svg>');
-    return lines.join('\n');
+    return { svg: lines.join('\n'), view: view };
+  }
+
+  function exportSvg() {
+    return buildExport().svg;
+  }
+
+  /* Shows the export markup rendered as its own image, so the panel is
+     the file the user is about to get — crop, background and all —
+     rather than a redraw of the editor. Loading it as an image also
+     means the frame sizes to the artwork exactly, which is what makes
+     the trim visible. */
+  function renderPreview() {
+    if (!el.preview) return;
+
+    var built = buildExport();
+    if (!built.svg || !built.view) {
+      el.preview.classList.add('is-empty');
+      el.previewImg.removeAttribute('src');
+      el.previewSize.textContent = 'Nothing to export yet';
+      return;
+    }
+
+    el.preview.classList.remove('is-empty');
+    el.preview.classList.toggle('is-checkered', !BACKGROUNDS[state.background]);
+    el.previewImg.src =
+      'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(built.svg);
+
+    el.previewSize.textContent =
+      Math.round(built.view.w) + ' × ' + Math.round(built.view.h) + ' px' +
+      (state.trim ? ' · trimmed to the path' : ' · full canvas');
   }
 
   function download() {
@@ -1032,6 +1065,9 @@
     el.draft = $('draft');
     el.joints = $('joints');
     el.toast = $('toast');
+    el.preview = $('export-preview');
+    el.previewImg = $('preview-image');
+    el.previewSize = $('preview-size');
     el.statJoints = $('stat-joints');
     el.statLength = $('stat-length');
     el.statSegments = $('stat-segments');
